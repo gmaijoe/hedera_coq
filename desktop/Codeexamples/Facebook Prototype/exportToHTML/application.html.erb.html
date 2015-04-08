@@ -1,0 +1,63 @@
+<html>
+<head>
+<title>application.html.erb</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
+.s0 { color: rgb(232,191,106); }
+.s1 { color: rgb(169,183,198); }
+.s2 { color: rgb(186,186,186); }
+.s3 { color: rgb(165,194,97); }
+.s4 { color: rgb(204,120,50); font-weight: bold; }
+.s5 { color: rgb(169,183,198); }
+.s6 { color: rgb(110,156,190); }
+.s7 { color: rgb(82,161,46); font-weight: bold; }
+.s8 { color: rgb(169,183,198); font-weight: bold; }
+.s9 { color: rgb(204,120,51); }
+.s10 { color: rgb(128,128,128); font-style: italic; }
+.s11 { color: rgb(204,120,50); }
+.s12 { color: rgb(255,198,109); font-style: italic; }
+.s13 { color: rgb(106,135,89); }
+</style>
+</head>
+<BODY BGCOLOR="#2b2b2b">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#C0C0C0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+application.html.erb</FONT>
+</center></TD></TR></TABLE>
+<pre>
+
+<a name="l1"><span class="ln">1    </span></a><span class="s0">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span><span class="s1"> 
+<a name="l2"><span class="ln">2    </span></a></span><span class="s0">&lt;!DOCTYPE </span><span class="s2">html </span><span class="s0">PUBLIC </span><span class="s3">&quot;-//W3C//DTD XHTML 1.0 Strict//EN&quot; &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd&quot;</span><span class="s0">&gt;</span><span class="s1"> 
+<a name="l3"><span class="ln">3    </span></a></span><span class="s0">&lt;html </span><span class="s2">xmlns=</span><span class="s3">&quot;http://www.w3.org/1999/xhtml&quot; </span><span class="s2">xml:lang=</span><span class="s3">&quot;en&quot; </span><span class="s2">lang=</span><span class="s3">&quot;en&quot;</span><span class="s0">&gt;</span><span class="s1"> 
+<a name="l4"><span class="ln">4    </span></a></span><span class="s0">&lt;head&gt;</span><span class="s1"> 
+<a name="l5"><span class="ln">5    </span></a>  </span><span class="s0">&lt;title&gt;</span><span class="s1"> 
+<a name="l6"><span class="ln">6    </span></a>    Project5 
+<a name="l7"><span class="ln">7    </span></a>  </span><span class="s0">&lt;/title&gt;</span><span class="s1"> 
+<a name="l8"><span class="ln">8    </span></a>  &lt;%=</span><span class="s4">yield </span><span class="s6">:stylesheet</span><span class="s1">%&gt; 
+<a name="l9"><span class="ln">9    </span></a>  &lt;%=</span><span class="s5">stylesheet_link_tag </span><span class="s7">&quot;application&quot;</span><span class="s1">%&gt; 
+<a name="l10"><span class="ln">10   </span></a>  &lt;%= </span><span class="s5">csrf_meta_tags</span><span class="s1">%&gt; 
+<a name="l11"><span class="ln">11   </span></a></span><span class="s0">&lt;/head&gt;</span><span class="s1"> 
+<a name="l12"><span class="ln">12   </span></a></span><span class="s0">&lt;body&gt;</span><span class="s1"> 
+<a name="l13"><span class="ln">13   </span></a></span><span class="s0">&lt;h1&gt;</span><span class="s1">Gavin's CS142 Ruby on Rails Assignment Webpage</span><span class="s0">&lt;/h1&gt;</span><span class="s1"> 
+<a name="l14"><span class="ln">14   </span></a></span><span class="s0">&lt;div&gt;</span><span class="s1"> 
+<a name="l15"><span class="ln">15   </span></a>  </span><span class="s8">&lt;% </span><span class="s4">if </span><span class="s5">session[</span><span class="s6">:user_id</span><span class="s5">] </span><span class="s9">== </span><span class="s4">nil </span><span class="s1">%&gt; </span><span class="s10">&lt;!--if user is not logged in --&gt;</span><span class="s1"> 
+<a name="l16"><span class="ln">16   </span></a>      &lt;%= </span><span class="s5">link_to(</span><span class="s7">&quot;Login&quot;</span><span class="s11">, </span><span class="s5">controller: </span><span class="s7">&quot;users&quot;</span><span class="s11">, </span><span class="s5">action: </span><span class="s7">&quot;login&quot;</span><span class="s5">) </span><span class="s1">%&gt; 
+<a name="l17"><span class="ln">17   </span></a>      </span><span class="s0">&lt;div&gt;</span><span class="s1">or</span><span class="s0">&lt;/div&gt;</span><span class="s1"> 
+<a name="l18"><span class="ln">18   </span></a>      &lt;%= </span><span class="s5">link_to(</span><span class="s7">&quot;Sign Up&quot;</span><span class="s11">, </span><span class="s5">controller: </span><span class="s7">&quot;users&quot;</span><span class="s11">, </span><span class="s5">action: </span><span class="s7">&quot;new&quot;</span><span class="s5">) </span><span class="s1">%&gt; 
+<a name="l19"><span class="ln">19   </span></a>  </span><span class="s8">&lt;% </span><span class="s4">else </span><span class="s1">%&gt; 
+<a name="l20"><span class="ln">20   </span></a>      &lt;%= </span><span class="s7">&quot;Hello&quot; </span><span class="s1">%&gt; &lt;%= </span><span class="s5">session[</span><span class="s6">:firstname</span><span class="s5">]</span><span class="s1">%&gt; &lt;%=</span><span class="s7">&quot;! &quot;</span><span class="s1">%&gt; 
+<a name="l21"><span class="ln">21   </span></a>      &lt;%= </span><span class="s5">link_to(</span><span class="s7">&quot;Logout&quot;</span><span class="s11">, </span><span class="s5">controller: </span><span class="s7">&quot;users&quot;</span><span class="s11">, </span><span class="s5">action: </span><span class="s7">&quot;logout&quot;</span><span class="s5">) </span><span class="s1">%&gt; 
+<a name="l22"><span class="ln">22   </span></a>  </span><span class="s8">&lt;% </span><span class="s4">end </span><span class="s1">%&gt; 
+<a name="l23"><span class="ln">23   </span></a>  </span><span class="s0">&lt;br/&gt;</span><span class="s1"> 
+<a name="l24"><span class="ln">24   </span></a>  &lt;%=</span><span class="s5">image_tag(</span><span class="s7">&quot;Stanford_logo.png&quot;</span><span class="s11">, </span><span class="s6">:size </span><span class="s12">=&gt; </span><span class="s13">'86x128'</span><span class="s5">)</span><span class="s1">%&gt; 
+<a name="l25"><span class="ln">25   </span></a>  &lt;%=</span><span class="s4">yield</span><span class="s1">%&gt; 
+<a name="l26"><span class="ln">26   </span></a>  </span><span class="s0">&lt;br /&gt;</span><span class="s1"> 
+<a name="l27"><span class="ln">27   </span></a>  </span><span class="s0">&lt;br /&gt;</span><span class="s1"> 
+<a name="l28"><span class="ln">28   </span></a>  </span><span class="s0">&lt;br /&gt;</span><span class="s1"> 
+<a name="l29"><span class="ln">29   </span></a></span><span class="s0">&lt;/div&gt;</span><span class="s1"> 
+<a name="l30"><span class="ln">30   </span></a></span><span class="s0">&lt;/body&gt;</span><span class="s1"> 
+<a name="l31"><span class="ln">31   </span></a></span><span class="s0">&lt;/html&gt;</span></pre>
+</body>
+</html>

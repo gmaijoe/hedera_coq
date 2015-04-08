@@ -1,0 +1,13 @@
+<% if session[:user_id] == nil %>
+    <p>
+      You do not have proper access to this page. Please login.
+    </p>
+<% else %>
+    <p>
+      Upload New Photo
+    </p>
+    <%= form_for(:photo, :method => :post, :url => {:action => :create}, :multipart => true) do |form| %>
+        <%= form.file_field(:photofilename) %> <br/>
+        <input type="submit" value="Upload"/>
+    <% end %>
+<% end %>

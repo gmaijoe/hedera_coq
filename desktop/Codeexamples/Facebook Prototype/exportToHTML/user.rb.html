@@ -1,0 +1,59 @@
+<html>
+<head>
+<title>user.rb</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
+.s0 { color: rgb(204,120,50); font-weight: bold; }
+.s1 { color: rgb(169,183,198); }
+.s2 { color: rgb(218,73,57); }
+.s3 { color: rgb(204,120,51); }
+.s4 { color: rgb(110,156,190); }
+.s5 { color: rgb(188,148,88); font-style: italic; }
+.s6 { color: rgb(208,208,255); }
+.s7 { color: rgb(204,120,50); }
+.s8 { color: rgb(188,148,88); font-weight: bold; font-style: italic; }
+</style>
+</head>
+<BODY BGCOLOR="#2b2b2b">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#C0C0C0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+user.rb</FONT>
+</center></TD></TR></TABLE>
+<pre>
+
+<a name="l1"><span class="ln">1    </span></a><span class="s0">class </span><span class="s2">User </span><span class="s3">&lt; </span><span class="s2">ActiveRecord</span><span class="s1">::</span><span class="s2">Base</span><span class="s1"> 
+<a name="l2"><span class="ln">2    </span></a> 
+<a name="l3"><span class="ln">3    </span></a>  has_many </span><span class="s4">:photos</span><span class="s1"> 
+<a name="l4"><span class="ln">4    </span></a>  has_many </span><span class="s4">:comments</span><span class="s1"> 
+<a name="l5"><span class="ln">5    </span></a> 
+<a name="l6"><span class="ln">6    </span></a>  </span><span class="s0">def self</span><span class="s1">.password 
+<a name="l7"><span class="ln">7    </span></a>    </span><span class="s5">#set raw value of password to instance variable of password</span><span class="s1"> 
+<a name="l8"><span class="ln">8    </span></a>    </span><span class="s6">@password </span><span class="s3">= </span><span class="s1">params[</span><span class="s4">:firsttrypassword</span><span class="s1">] 
+<a name="l9"><span class="ln">9    </span></a>    </span><span class="s0">return </span><span class="s6">@password</span><span class="s1"> 
+<a name="l10"><span class="ln">10   </span></a>  </span><span class="s0">end</span><span class="s1"> 
+<a name="l11"><span class="ln">11   </span></a> 
+<a name="l12"><span class="ln">12   </span></a>  </span><span class="s0">def self</span><span class="s1">.password=(userpassword) 
+<a name="l13"><span class="ln">13   </span></a>    </span><span class="s5"># first_name, last_name = userpassword.split()</span><span class="s1"> 
+<a name="l14"><span class="ln">14   </span></a>    </span><span class="s6">@saltNum </span><span class="s3">= </span><span class="s1">rand() 
+<a name="l15"><span class="ln">15   </span></a>    </span><span class="s0">self</span><span class="s1">.salt </span><span class="s3">= </span><span class="s6">@saltNum </span><span class="s5">#sets salt attribute</span><span class="s1"> 
+<a name="l16"><span class="ln">16   </span></a>    </span><span class="s0">self</span><span class="s1">.password_digest </span><span class="s3">= </span><span class="s2">Digest</span><span class="s1">::</span><span class="s2">SHA1</span><span class="s1">.hexdigest(userpassword.to_s </span><span class="s3">+ </span><span class="s0">self</span><span class="s1">.salt.to_s) </span><span class="s5">#sets password digest attribute</span><span class="s1"> 
+<a name="l17"><span class="ln">17   </span></a>    </span><span class="s0">self</span><span class="s1">.save 
+<a name="l18"><span class="ln">18   </span></a>  </span><span class="s0">end</span><span class="s1"> 
+<a name="l19"><span class="ln">19   </span></a> 
+<a name="l20"><span class="ln">20   </span></a>  </span><span class="s0">def self</span><span class="s1">.password_valid?(firstPassword</span><span class="s7">, </span><span class="s1">secondPassword) 
+<a name="l21"><span class="ln">21   </span></a>    </span><span class="s0">if </span><span class="s1">firstPassword </span><span class="s3">== </span><span class="s1">secondPassword 
+<a name="l22"><span class="ln">22   </span></a>      </span><span class="s0">return true</span><span class="s1"> 
+<a name="l23"><span class="ln">23   </span></a>    </span><span class="s0">else</span><span class="s1"> 
+<a name="l24"><span class="ln">24   </span></a>      </span><span class="s0">return false</span><span class="s1"> 
+<a name="l25"><span class="ln">25   </span></a>    </span><span class="s0">end</span><span class="s1"> 
+<a name="l26"><span class="ln">26   </span></a>  </span><span class="s0">end</span><span class="s1"> 
+<a name="l27"><span class="ln">27   </span></a> 
+<a name="l28"><span class="ln">28   </span></a>  </span><span class="s5">#validates </span><span class="s8">:first_name</span><span class="s5">, </span><span class="s8">:last_name</span><span class="s5">, </span><span class="s8">:login</span><span class="s5">, precence: true</span><span class="s1"> 
+<a name="l29"><span class="ln">29   </span></a>  </span><span class="s5">#I don't think this works, error: Unknown validator: </span><span class="s8">'PrecenceValidator' </span><span class="s5">^^^</span><span class="s1"> 
+<a name="l30"><span class="ln">30   </span></a></span><span class="s0">end</span><span class="s1"> 
+<a name="l31"><span class="ln">31   </span></a> 
+<a name="l32"><span class="ln">32   </span></a></span></pre>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<% if session[:user_id] == nil %>
+    <p>
+      You do not have proper access to this page. Please login.
+    </p>
+<% else %>
+    <p/>
+    Add a comment!
+    <br/>
+    <%=image_tag(@photo.file_name)%> <br/>
+    <p/>
+
+    <%= form_for(:comment, :method => :post, :url => {:action => :create}, :multipart => true) do |form| %>
+        <%= label_tag(:newcomment, "Add comment:") %>
+        <%= text_field_tag(:newcomment) %>
+        <%= submit_tag("Submit") %>
+    <% end %>
+<% end %>
+
