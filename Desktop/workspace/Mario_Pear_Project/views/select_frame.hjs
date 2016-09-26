@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<div id="main-head">
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<title>{{ title }}</title>
+		<link rel='stylesheet' href='/stylesheets/style.css' />
+
+		<!-- JQuery Bower -->
+		<script type="text/javascript" src='/bower_components/jquery/dist/jquery.min.js'></script>
+
+		<!-- Tether Bower (required for bootstrap 4.0.0) -->
+		<link rel="stylesheet" href="/bower_components/tether/dist/css/tether.min.css">
+		<script type="text/javascript" src="bower_components/tether/dist/js/tether.min.js"></script>
+
+		<!-- Bootstrap Bower 4.0.0 -->
+		<link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
+		<script type="text/javascript" src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+	</div>
+</head>
+
+<body>
+    <div id="video_div">
+        <video id="videoID" controls>
+            <source src="/videos/mario.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    <br>
+    <div id="start_times">
+        <b>Start Time Matches</b>
+        <li><a id="time" href="#">4.5</a></li>
+        <li><a id="time" href="#">10.4</a></li>
+        <li><a id="time" href="#">50.3</a></li>
+    </div><br><br>
+    <div style="padding: 20px;">
+        <p style="display:inline">Video Time To Submit:&nbsp;</p>
+        <p style="display:inline" id="currentT">0</p>
+        <p style="display:inline">&nbsp;seconds</p>
+    </div>
+    <div class="wrapper">
+        <form id="capture">
+            <button type="submit" class="btn btn-primary">Capture Frame</button>
+        </form>
+    </div>
+</body>
+
+<script>
+
+//POST contentType: "application/json; charset=utf-8",
+//utf 8 encoding, no spaces
+var video_elem = $('#videoID')[0];
+var current_time = video_elem.currentTime;
+
+
+
+function updateTime() {
+    current_time = video_elem.currentTime;
+    $('#currentT').html(current_time);
+
+};    
+
+$(function(){
+    // encode by utf-8 encoding, no spaces...
+
+    $('#start_times a').click(function(){
+        video_elem.currentTime = this.innerText;
+        updateTime();
+    });
+
+    video_elem.addEventListener('playing', function(){
+        var myVar = setInterval(updateTime, 80);
+    })
+
+    document.getElementById("capture").onsubmit=function() {
+        window.location.href = "filter";
+        return false;
+    }
+}); 
+</script>
+
+</html>
