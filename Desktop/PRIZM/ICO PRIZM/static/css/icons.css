@@ -1,0 +1,129 @@
+/*
+ * Icon Font website-bancor
+ * Made with love by Icons8 [ https://icons8.com/ ] using FontCustom [ https://github.com/FontCustom/fontcustom ]
+ *
+ * Contacts:
+ *    [ https://icons8.com/contact ]
+ *
+ * Follow Icon8 on
+ *    Twitter [ https://twitter.com/icons_8 ]
+ *    Facebook [ https://www.facebook.com/Icons8 ]
+ *    Google+ [ https://plus.google.com/+Icons8 ]
+ *    GitHub [ https://github.com/icons8 ]
+ */
+
+
+@font-face {
+  font-family: "website-bancor";
+  src: url("../fonts/website-bancor_54b18aaa7616429d78d0f6e6ef45702f.eot");
+  src: url("../fonts/website-bancor_54b18aaa7616429d78d0f6e6ef45702f.eot?#iefix") format("embedded-opentype"),
+       url("../fonts/website-bancor_54b18aaa7616429d78d0f6e6ef45702f.woff2") format("woff2"),
+       url("../fonts/website-bancor_54b18aaa7616429d78d0f6e6ef45702f.woff") format("woff"),
+       url("../fonts/website-bancor_54b18aaa7616429d78d0f6e6ef45702f.ttf") format("truetype"),
+       url("../fonts/website-bancor_54b18aaa7616429d78d0f6e6ef45702f.svg#website-bancor") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  @font-face {
+    font-family: "website-bancor";
+    src: url("../fonts/website-bancor_54b18aaa7616429d78d0f6e6ef45702f.svg#website-bancor") format("svg");
+  }
+}
+
+[data-icons8]:before { content: attr(data-icons8); }
+
+.icons8, [data-icons8]:before,
+.icons8-back:before,
+.icons8-backwards:before,
+.icons8-bancor:before,
+.icons8-bancor-2:before,
+.icons8-bancor-3:before,
+.icons8-bitcoin:before,
+.icons8-bitcointalk:before,
+.icons8-checkmark:before,
+.icons8-circled-play-filled:before,
+.icons8-coins:before,
+.icons8-collapse-arrow:before,
+.icons8-eth:before,
+.icons8-exchange:before,
+.icons8-expand-arrow:before,
+.icons8-facebook:before,
+.icons8-forward:before,
+.icons8-github-filled:before,
+.icons8-goal:before,
+.icons8-hub:before,
+.icons8-info:before,
+.icons8-left-filled:before,
+.icons8-linkedin:before,
+.icons8-marker:before,
+.icons8-marker-filled:before,
+.icons8-medium-filled:before,
+.icons8-mind-map-filled:before,
+.icons8-module:before,
+.icons8-neutral-trading:before,
+.icons8-no-cash:before,
+.icons8-ok-filled:before,
+.icons8-reddit-filled:before,
+.icons8-refund-2:before,
+.icons8-right-filled:before,
+.icons8-safe-ok:before,
+.icons8-slack-filled:before,
+.icons8-techcrunch:before,
+.icons8-telegram:before,
+.icons8-twitter-filled:before,
+.icons8-youtube-2-filled:before {
+  display: inline-block;
+  font-family: "website-bancor";
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  line-height: 1;
+  text-decoration: inherit;
+  text-rendering: optimizeLegibility;
+  text-transform: none;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  font-smoothing: antialiased;
+}
+
+.icons8-back:before { content: "\f14e"; }
+.icons8-backwards:before { content: "\f163"; }
+.icons8-bancor:before { content: "\f13a"; }
+.icons8-bancor-2:before { content: "\f144"; }
+.icons8-bancor-3:before { content: "\f14a"; }
+.icons8-bitcoin:before { content: "\f12b"; }
+.icons8-bitcointalk:before { content: "\f12a"; }
+.icons8-checkmark:before { content: "\f129"; }
+.icons8-circled-play-filled:before { content: "\f14c"; }
+.icons8-coins:before { content: "\f11b"; }
+.icons8-collapse-arrow:before { content: "\f155"; }
+.icons8-eth:before { content: "\f141"; }
+.icons8-exchange:before { content: "\f143"; }
+.icons8-expand-arrow:before { content: "\f154"; }
+.icons8-facebook:before { content: "\f127"; }
+.icons8-forward:before { content: "\f14d"; }
+.icons8-github-filled:before { content: "\f11d"; }
+.icons8-goal:before { content: "\f136"; }
+.icons8-hub:before { content: "\f153"; }
+.icons8-info:before { content: "\f167"; }
+.icons8-left-filled:before { content: "\f168"; }
+.icons8-linkedin:before { content: "\f13f"; }
+.icons8-marker:before { content: "\f13c"; }
+.icons8-marker-filled:before { content: "\f150"; }
+.icons8-medium-filled:before { content: "\f11f"; }
+.icons8-mind-map-filled:before { content: "\f12f"; }
+.icons8-module:before { content: "\f124"; }
+.icons8-neutral-trading:before { content: "\f137"; }
+.icons8-no-cash:before { content: "\f138"; }
+.icons8-ok-filled:before { content: "\f133"; }
+.icons8-reddit-filled:before { content: "\f120"; }
+.icons8-refund-2:before { content: "\f123"; }
+.icons8-right-filled:before { content: "\f151"; }
+.icons8-safe-ok:before { content: "\f12e"; }
+.icons8-slack-filled:before { content: "\f11c"; }
+.icons8-techcrunch:before { content: "\f165"; }
+.icons8-telegram:before { content: "\f148"; }
+.icons8-twitter-filled:before { content: "\f11e"; }
+.icons8-youtube-2-filled:before { content: "\f13e"; }
