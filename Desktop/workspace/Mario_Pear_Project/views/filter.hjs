@@ -7,6 +7,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
 		<title>{{ title }}</title>
+        <link rel="icon" type="image/x-icon" href="images/favicon.ico"/>
+
 		<link rel='stylesheet' href='/stylesheets/style.css' />
 
 		<!-- JQuery Bower -->
@@ -23,11 +25,11 @@
 </head>
 
 <body>
+    <a target="_blank" href="https://acusense.ai/"><img id="relative_logo" src="images/acusense-logo.png"></a>
     <center><h1>Apply a Filter!</h1></center><br><hr>
     <div id="content">
-        <div class='col-xs-6 col-md-4'>
+        <div class='col-xs-3 col-md-2'>
             <center>
-
                 <b>Filters</b><br><br>
                 <div id="filter_options">
                     <div class="form-check">
@@ -36,6 +38,7 @@
                             Picasso
                         </label>
                         <img id="small" src="images/picasso.jpg">
+                        <br>
                     </div>
                     <div class="form-check">
                         <label class="form-check-label">
@@ -43,13 +46,22 @@
                             Shipwreck
                         </label>
                         <img id="small" src="images/shipwreck.jpg">
+                        <br>
                     </div>
+                </div>
+            </center>
+        </div>
+        <div class='col-xs-3 col-md-2'>
+            <center>
+                <b>&nbsp;</b><br><br>
+                <div id="filter_options">
                     <div class="form-check">
                         <label class="form-check-label"> 
                             <input class="form-check-input" type="radio" name="radAnswer" id="scream" value="option2">
                             Scream
                         </label>
                         <img id="small" src="images/scream.jpg">
+                        <br>
                     </div>
                     <div class="form-check">
                         <label class="form-check-label">
@@ -63,24 +75,32 @@
         </div>
         <div class='col-xs-12 col-md-8'>
             <center>
-                <b>Current Picture</b><br><br>
+                <b>Current Picture</b><br><br><br>
                 <div id="img_content"></div>
-                <img id="load" src="http://www.rybena.com.br:8080/RybenaRepository/resource/img/loading.gif">
             </center>
+            <div id="loading_gif"></div>
+            <p>&nbsp;</p>
+            <div class="wrapper">
+                <form id="create_pic">
+                    <button type="submit" class="btn btn-success">Create Picture</button>
+                </form>
+            </div>
+            <br><br><br>
         </div>
-    </div>
-    <br><br><br>
-    <p>&nbsp;</p>
-    <div class="wrapper">
-        <form id="create_pic">
-            <button type="submit" class="btn btn-success">Create Picture</button>
-        </form>
     </div>
 </body>
 
 <script>
+function load_gif() {
+    var gif = "/images/loading_gif.gif";
+    $('#loading_gif').html("<img id=\"mediumgif\" src=\"" + gif + "\"></img>")
+}
+
+function remove_load_gif() {
+    $('#loading_gif').empty();
+}
+
 $(function(){
-    $('#load').hide();
     var queryString = getQueryStringValue("image"); 
     var originalURL = returnURL(queryString);
     
@@ -104,14 +124,12 @@ $(function(){
             // nothing
         } 
 
-        console.log(name);
-        console.log(active_id);
-
+        load_gif();
         searchRequest = $.ajax({
             type: "GET",
             contentType: 'text/plain',
             crossDomain: true,
-            url: "http://ec2-54-67-117-88.us-west-1.compute.amazonaws.com/filter/image",
+            url: "https://api-hackathon-testino.acusense.ai/filter/image",
             data: {
                 'image_name' : name,
                 'filter' : active_id
@@ -119,9 +137,9 @@ $(function(){
             dataType: "text",
             success: function(msg){
                 var json_obj = JSON.parse(msg);
-                console.log(json_obj);
                 var original = json_obj.original_url;
                 var weird = json_obj.filtered_url;
+                remove_load_gif();
                 window.location = '/share?url=' + encodeURIComponent(weird);
             }
         });

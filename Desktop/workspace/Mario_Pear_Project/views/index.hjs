@@ -7,6 +7,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
 		<title>{{ title }}</title>
+		<link rel="icon" type="image/x-icon" href="images/favicon.ico"/>
 		<link rel='stylesheet' href='/stylesheets/style.css' />
 
 		<!-- JQuery Bower -->
@@ -24,8 +25,9 @@
 
 <body>
 	<div id="navbar">
+		<a target="_blank" href="https://acusense.ai/"><img id="fixed_logo" src="images/acusense-logo.png"></a>
 		<div id="outerdiv" class="visible-lg" style="margin-top: 5px;">
-			<input type="text" data-i-search-input="true" class="form-control" name="word" data-autocomplete="true" data-autocomplete-url="" placeholder="Search" id="search_bar"></input>
+			<input type="text" data-i-search-input="true" class="form-control" name="word" data-autocomplete="true" data-autocomplete-url="" placeholder="acusense ai search" id="search_bar"></input>
 		</div>
 		<br>
 
@@ -42,12 +44,8 @@
 	</div>
 
 	<br>
-	<div id="resultdiv">
-{{! 		<div id="padding"><a class="result"><img src="https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcSayd3B71SXS8b9GvuQiyu88aDbEmyGWpAGEOjNF4VFIT0uhs5R"></a></div>
-		<div id="padding"><a class="result"><img src="http://www.famousphotographers.net/images/mario-testino.jpg"></a></div>
-		<div id="padding"><a class="result"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWF_r3SzX9hdgKIGo9RH3wUNKSRcATwTjNle80Eg0rw-yuuPncgOuCg0Za"></a></div> }}
-		<div id="innerdiv"></div>
-	</div>
+	<div id="resultdiv"></div>
+	<div id='loading_gif'></div>
 </body>
 
 <script>
@@ -75,12 +73,12 @@ $(function () {
             if (searchRequest != null) 
                 searchRequest.abort();
             if (active_id == 'photo_link') {
-            	console.log("photo ajax");
+            	load_gif();
             	searchRequest = $.ajax({
             		type: "GET",
             		contentType: 'text/plain',
 					crossDomain: true,
-            		url: "http://ec2-54-67-117-88.us-west-1.compute.amazonaws.com/search/allimages/text/", // PHOTO SEARCH
+            		url: "https://api-hackathon-testino.acusense.ai/search/allimages/text/", // PHOTO SEARCH
             		data: {
             			'query' : value
             		},
@@ -91,37 +89,37 @@ $(function () {
             			var innerdiv = $("<div>");
             			$.each(json_obj.images, function(index, element) {
         					innerdiv.append("<div id=\"padding\"><a><img class=\"result\" src=\"" + element.image_url + "\"></a></div>");
-        					// result.html(innerdiv);
             			}); 
             			result.html(innerdiv);
+            			remove_load_gif();
             		}
             	});
 
             } else { // active_id == 'video_link'
-	            console.log("video ajax");
+	            load_gif();
             	searchRequest = $.ajax({
             		type: "GET",
             		contentType: 'text/plain',
 					crossDomain: true,
-            		url: "http://ec2-54-67-117-88.us-west-1.compute.amazonaws.com/search/allvideos/text/", // VIDEO SEARCH
+            		url: "https://api-hackathon-testino.acusense.ai/search/allvideos/text/", // VIDEO SEARCH
             		data: {
             			'query' : value
             		},
             		dataType: "text",
             		success: function(msg){
             			var json_obj = JSON.parse(msg);
-            			console.log(json_obj);
+            			sessionStorage.setItem("current_video_obj", JSON.stringify(json_obj));
             			var result = $("#resultdiv");
             			var innerdiv = $("<div>");
             			$.each(json_obj.videos, function(index, element) {
-            				var timediv = $("<div>");
+            				var timediv = $("<div>Clips: </div>");
         					$.each(element.clips, function(clip_index, clip_elem) {
-        						console.log(clip_elem.start_time);
-        						timediv.append("<li>" + clip_elem.start_time + "</li>");
+        						timediv.append("<a style=\"display:inline\" id=\"time\" href=\"#\">" + clip_elem.start_time + "</a>");
         					}); 
-        					innerdiv.append("<div id=\"1\"><video id=\"videoID\" controls><source src=\"" + element.video_url + "\" type=\"video/mp4\">Your browser does not support the video tag.</video><div id=\"2\"><center>" + timediv[0].innerHTML + "</center></div></div>");
+        					innerdiv.append("<div id=\"outershell\"><div id=\"inner1\"><video id=\"videoID\" controls><source src=\"" + element.video_url + "\" type=\"video/mp4\">Your browser does not support the video tag.</video></div><div id=\"inner2\"><center>" + timediv[0].innerHTML + "</center></div></div><br><br>");
             			}); 
             			result.html(innerdiv);
+						remove_load_gif();
             		}
             	});
             }
@@ -130,24 +128,25 @@ $(function () {
 
 	$("body").on("click", ".result", function(){
 		var original = this.src;
-		// console.log(original);
 		var parsed = original.split("/")[5];
-		// console.log(name_pass);
-		// window.location = 'filter';
 		window.location = '/filter?image=' + encodeURIComponent(parsed);
 	});
 
-	$("body").on("click", "#time", function(){
-		// var video_elem = this.parent.parent;
-		// alert(video_elem);
-		console.log(this);
-		// video_elem.currentTime = this.innerText;
+	$("body").on("click", "#time", function(e){
+		var link = $(this).parent().parent();
+		var video_shell = link.prev();
+		var video = video_shell.find('video').get(0);
+		video.currentTime = this.innerText;
+		e.preventDefault();
 	});
 
-	$("body").on("click", 'video #videoID', function(){
-		console.log(this);
-		var videoURL = this.source.src;
-		console.log(videoURL);
+	$("body").on("click", 'video', function(){
+		var videoURL = $(this).find("source").get(0).src;
+		var temporary_result_obj = find_video_JSON(videoURL);
+		sessionStorage.setItem("current_video_obj", JSON.stringify(temporary_result_obj)); // store for current session :)
+		var current_time = $(this).get(0).currentTime;
+		sessionStorage.setItem("current_video_time", current_time);
+		window.location = '/select_frame?video=' + encodeURIComponent(videoURL);
 	});
 
     $('#tab_list a').click(function (e) {
@@ -157,27 +156,98 @@ $(function () {
     });
 });
 
+function find_video_JSON(url) {
+    var objects = [];
+    var session_video_obj = JSON.parse(sessionStorage.getItem("current_video_obj"));
+    $.each(session_video_obj.videos, function(index, element) {
+    	if (element.video_url == url) {
+    		$.each(element.clips, function(clip_index, clip_elem) {
+    			objects.push(clip_elem.start_time);
+    		}); 
+    	}
+    }); 
+    return objects;
+}
+
 function current_ID() {
 	var active_tab = $('#tab_list a.active');
 	var active_id = active_tab.get(0).id;
 	return active_id;
 };
 
+function load_gif() {
+	var gif = "/images/loading_gif.gif";
+	$('#loading_gif').html("<img id=\"biggif\" src=\"" + gif + "\"></img>")
+}
+
+function remove_load_gif() {
+	$('#loading_gif').empty();
+}
+
+function clear_search() {
+	$("#resultdiv").empty();
+}
+
 function populate_image_search(query){
-	var newDiv = "<div class=\"result\">"
+	load_gif();
+	clear_search();
+	searchRequest = $.ajax({
+		type: "GET",
+		contentType: 'text/plain',
+		crossDomain: true,
+		url: "https://api-hackathon-testino.acusense.ai/search/allimages/text/", // PHOTO SEARCH
+		data: {
+			'query' : query
+		},
+		dataType: 'text',
+		success: function(msg){
+			var json_obj = JSON.parse(msg);
+			var result = $("#resultdiv");
+			var innerdiv = $("<div>");
+			$.each(json_obj.images, function(index, element) {
+				innerdiv.append("<div id=\"padding\"><a><img class=\"result\" src=\"" + element.image_url + "\"></a></div>");
+			}); 
+			result.html(innerdiv);
+			remove_load_gif();
+		}
+	});	
 };
 
 function populate_video_search(query){
-	
+	load_gif();
+	clear_search();
+	searchRequest = $.ajax({
+		type: "GET",
+		contentType: 'text/plain',
+		crossDomain: true,
+		url: "https://api-hackathon-testino.acusense.ai/search/allvideos/text/", // VIDEO SEARCH
+		data: {
+			'query' : query
+		},
+		dataType: "text",
+		success: function(msg){
+			var json_obj = JSON.parse(msg);
+			sessionStorage.setItem("current_video_obj", JSON.stringify(json_obj));
+			var result = $("#resultdiv");
+			var innerdiv = $("<div>");
+			$.each(json_obj.videos, function(index, element) {
+				var timediv = $("<div>Clips: </div>");
+				$.each(element.clips, function(clip_index, clip_elem) {
+					timediv.append("<a style=\"display:inline\" id=\"time\" href=\"#\">" + clip_elem.start_time + "</a>");
+				}); 
+				innerdiv.append("<div id=\"outershell\"><div id=\"inner1\"><video id=\"videoID\" controls><source src=\"" + element.video_url + "\" type=\"video/mp4\">Your browser does not support the video tag.</video></div><div id=\"inner2\"><center>" + timediv[0].innerHTML + "</center></div></div><br><br>");
+			}); 
+			result.html(innerdiv);
+			remove_load_gif();
+		}
+	});	
 };
 
 function refresh_search(id){
 	var query = $('#search_bar').val();
 	if (id == 'photo_link') {
-		console.log("photo tab clicked");
 		populate_image_search(query);
 	} else { // id == 'video_link'
-		console.log("video tab clicked");
 		populate_video_search(query);
 	}
 };

@@ -7,6 +7,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
 		<title>{{ title }}</title>
+        <link rel="icon" type="image/x-icon" href="images/favicon.ico"/>
+
 		<link rel='stylesheet' href='/stylesheets/style.css' />
 
 		<!-- JQuery Bower -->
@@ -23,7 +25,10 @@
 </head>
 
 <body>
-    <center><b>Share!</b></center><br>
+    <div id="header">
+        <a target="_blank" href="https://acusense.ai/"><img id="relative_logo" src="images/acusense-logo.png"></a>
+        <center><h1>Share!</h1></center><br>
+    </div>
     <div id="result_pic">
     </div><br>
     <div id="share-buttons">
@@ -94,7 +99,6 @@
             } else {
                     // element not found
             }
-            console.log(all_elements[i].href);
         }
     };
 </script>

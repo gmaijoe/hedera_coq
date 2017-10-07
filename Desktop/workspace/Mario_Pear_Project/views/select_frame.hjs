@@ -7,6 +7,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
 		<title>{{ title }}</title>
+        <link rel="icon" type="image/x-icon" href="images/favicon.ico"/>
+
 		<link rel='stylesheet' href='/stylesheets/style.css' />
 
 		<!-- JQuery Bower -->
@@ -23,19 +25,10 @@
 </head>
 
 <body>
-    <div id="video_div">
-        <video id="videoID" controls>
-            <source src="/videos/mario.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
-    </div>
+    <a target="_blank" href="https://acusense.ai/"><img id="relative_logo" src="images/acusense-logo.png"></a>
+    <center><h2>Select Video Frame</h2></center>
+    <div id="video_div"></div>
     <br>
-    <div id="start_times">
-        <b>Start Time Matches</b>
-        <li><a id="time" href="#">4.5</a></li>
-        <li><a id="time" href="#">10.4</a></li>
-        <li><a id="time" href="#">50.3</a></li>
-    </div><br><br>
     <div style="padding: 20px;">
         <p style="display:inline">Video Time To Submit:&nbsp;</p>
         <p style="display:inline" id="currentT">0</p>
@@ -50,33 +43,82 @@
 
 <script>
 
-//POST contentType: "application/json; charset=utf-8",
-//utf 8 encoding, no spaces
-var video_elem = $('#videoID')[0];
-var current_time = video_elem.currentTime;
+var videoURL = getQueryStringValue("video");
+var session_stored_video_times = getVideoTimes("current_video_obj");
+var session_stored_time = sessionStorage.getItem("current_video_time");
+createVideo();
+var video_elem = $('#video_div').find('video').get(0);
+setVideoTime(session_stored_time);
 
+function getQueryStringValue (key) {  
+  return unescape(window.location.search.replace(new RegExp("^(?:.*[&\\?]" + escape(key).replace(/[\.\+\*]/g, "\\$&") + "(?:\\=([^&]*))?)?.*$", "i"), "$1"));  
+}; 
 
+function setVideoTime(start_time) {
+    video_elem.currentTime = start_time;
+};
 
 function updateTime() {
     current_time = video_elem.currentTime;
     $('#currentT').html(current_time);
 
-};    
+};
+
+function getVideoTimes(key) {
+    return JSON.parse(sessionStorage.getItem(key));
+};
+
+function createVideo() {
+    var result = $("#video_div");
+    var innerdiv = $("<div id=\"start_times\">");
+    var timediv = $("<div>Clips: </div>");
+    for (var i = 0; i < session_stored_video_times.length; i++){
+        timediv.append("&nbsp;<a style=\"display:inline\" id=\"time\" href=\"#\">" + session_stored_video_times[i] + "</a>&nbsp;");
+    }
+    innerdiv.append("<div id=\"outershell\"><div id=\"inner1\"><video id=\"videoID\" controls><source src=\"" + videoURL + "\" type=\"video/mp4\">Your browser does not support the video tag.</video></div><div id=\"inner2\"><center>" + timediv[0].innerHTML + "</center></div></div><br><br>");
+    result.html(innerdiv);
+};  
+
+function parseUrl(link) {
+    return link.split("/")[5];
+}; 
 
 $(function(){
-    // encode by utf-8 encoding, no spaces...
-
-    $('#start_times a').click(function(){
+    $('body').on("click", "#start_times a", function(e){
         video_elem.currentTime = this.innerText;
         updateTime();
+        e.preventDefault();
     });
 
     video_elem.addEventListener('playing', function(){
-        var myVar = setInterval(updateTime, 80);
-    })
+        console.log("playing");
+        setInterval(updateTime, 80);
+    });
 
     document.getElementById("capture").onsubmit=function() {
-        window.location.href = "filter";
+        var currentime = video_elem.currentime;
+        var video_param = parseUrl(videoURL);
+
+        // captureRequest = $.ajax({
+        //         type: "GET",
+        //         contentType: 'text/plain',
+        //         crossDomain: true,
+        //         url: "", // Capture Frame Request
+        //         data: {
+        //             'start' : currentime,
+        //             'video_param' : video_param
+        //         },
+        //         dataType: "text",
+        //         success: function(msg){
+        //             var json_obj = JSON.parse(msg);
+        //             var original = json_obj.original_url;
+        //             var weird = json_obj.filtered_url;
+        //             // loading gif
+        //             window.location = '/share?url=' + encodeURIComponent(weird);
+        //         }
+        //     }); 
+
+        // window.location = '/filter?image=' + encodeURIComponent(videoURL);
         return false;
     }
 }); 
