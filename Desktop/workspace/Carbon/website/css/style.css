@@ -297,7 +297,7 @@ textarea.form-control {height: 110px;resize: none;
 
 
 /* selected link */
-.img-circle {box-shadow: 0px 0px 8px 1px #6cbcec;border-radius: 100%;margin-bottom: 10px;
+.img-circle {box-shadow: 0px 0px 8px 1.4px #6cbcec;border-radius: 100%;margin-bottom: 10px;
 }
 
 
@@ -367,7 +367,7 @@ textarea.form-control {height: 110px;resize: none;
 
 
 /* selected link */
-.bannerbtn:hover {font-family: heiti sc;border: 1px solid #6cbcec;background: #6cbcec;color: #fff;cursor: pointer;
+.bannerbtn:hover {font-family: heiti sc;border: 1px solid ##6cbcec;background: #6cbcec;color: #fff;cursor: pointer;
 }
 
 
@@ -521,7 +521,7 @@ a:active {color: #6cbcec;
 }
 
 /* selected link */
-@font-face {font-family: 'Heiti SC';src: local('Heiti SC'), url('../fonts/STHeiti.ttf') format('truetype');
+@font-face {font-family: 'Heiti SC';src: local('Heiti SC'), url('fonts/STHeiti.ttf') format('truetype');
 }
 
 /* selected link */
@@ -557,7 +557,7 @@ a:active {color: #6cbcec;
 @font-face {
   font-family: 'Heiti SC';
   src: url('../fonts/STHeiti.ttc');
-  src: local('Heiti SC'), url('../fonts/STHeiti.ttf') format('truetype');
+  src: local('Heiti SC'), url('fonts/STHeiti.ttf') format('truetype');
 }
 
 #loader-wrapper {
@@ -1029,7 +1029,7 @@ section::after {
 }
 @media(max-width: 640px){
   html, body{
-    padding-bottom: 0px;
+    padding-bottom: 40px;
   }
   #footer a{
     font-size: 14px;
@@ -1083,24 +1083,11 @@ a:active {
     color: #6cbcec;
 }
 
-#team {background: rgba(37, 54, 77, 0.3) ;border-top: 1px solid #406985; border-bottom: 1px solid #406985;
+#team {background: #25364d54;border-top: 1px solid #406985; border-bottom: 1px solid #406985;
 
 }
 footer .topicontable {
     float: none;
-    margin: 10px 0;
+    margin: 35px 0;
     color: #fff;
-    display: inline-block;
-    text-align: center;
-}
-
-    footer .topiconbox {
-float: none;
-    display: inline-block;
-    margin: 5px 12px;
-    position: relative;
-}
-
-.main {
-    height: 100Vh;
 }
