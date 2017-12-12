@@ -1,0 +1,240 @@
+@charset "utf-8";
+
+/***** optional *****/
+
+@media only screen and (min-width: 1199px) and (max-width: 4000px) {
+
+}
+
+
+/***** optional *****/
+
+@media only screen and (min-width: 1024px) and (max-width: 1199px) {
+
+}
+
+
+/***** optional *****/
+
+@media only screen and (min-width: 992px) and (max-width: 1024px) {
+
+
+/***** optional *****/
+
+.logobox {margin-top:9px;
+
+}
+
+}
+
+
+/***** optional *****/
+
+@media only screen and (min-width: 768px) and (max-width: 992px) {
+
+}
+
+
+/***** optional *****/
+
+@media only screen and (min-width: 640px) and (max-width: 768px) {
+
+}
+
+
+/***** optional *****/
+
+@media only screen and (min-width: 603px) and (max-width: 640px) {
+
+}
+
+
+/***** optional *****/
+
+@media only screen and (min-width: 568px) and (max-width: 603px) {
+
+}
+
+
+/***** optional *****/
+
+@media only screen and (min-width: 480px) and (max-width: 568px) {
+
+}
+
+
+/***** optional *****/
+
+@media only screen and (min-width: 360px) and (max-width: 480px) {
+
+}
+
+
+/***** optional *****/
+
+@media only screen and (min-width: 320px) and (max-width: 360px) {
+
+}
+
+
+/***** optional *****/
+
+@media only screen and (min-width: 240px) and (max-width: 319px) {
+
+}
+
+
+/***** optional *****/
+
+@media only screen and (min-width: 150px) and (max-width: 239px) {
+
+}
+@media only screen and (min-width: 1199px) and (max-width: 4000px){
+	.roadmaptable{width:879px;}
+	.roadmapcon{font-size:20px; margin:10px 0 0 50px;}
+	.logobox{margin-top:44px;}
+	.topicontable{float:right; margin-top:44px;}
+	.teamboxarea{width:80%;}
+	.teamboxtext{margin-bottom:150px;}
+	.bannerbtn{margin:90px auto;}
+	.bannertext{font-size:25px;}
+	.aboutuscon{font-size:22px;}
+	.sectionhead{margin:100px auto;}
+}
+
+@media only screen and (min-width: 1024px) and (max-width: 1199px){
+	.roadmaptable{width:784px;}
+	.roadmapcon{font-size:20px; margin:10px 0 0 50px;}
+	.logobox{margin-top:44px;}	
+	.topicontable{float:right; margin-top:44px;}
+	.teamboxarea{width:90%;}	
+	.teamboxtext{margin-bottom:150px;}
+	.bannerbtn{margin:90px auto;}
+	.bannertext{font-size:25px;}
+	.aboutuscon{font-size:22px;}
+	.sectionhead{margin:80px auto;}
+}
+
+@media only screen and (min-width: 992px) and (max-width: 1024px) {
+	.roadmaptable{width:784px;}
+	.roadmapcon{font-size:20px; margin:10px 0 0 50px;}	
+	.logobox{margin-top:44px;}
+	.topicontable{float:right; margin-top:44px;}
+	.teamboxarea{width:90%;}
+	.teamboxtext{margin-bottom:150px;}
+	.bannerbtn{margin:90px auto;}
+	.bannertext{font-size:25px;}
+	.aboutuscon{font-size:22px;}
+	.sectionhead{margin:80px auto;}
+}
+
+@media only screen and (min-width: 768px) and (max-width: 992px) {
+	.roadmaptable{width:740px;}
+	.roadmapcon{font-size:20px; margin:10px 0 50px 19px;}
+	.logobox{margin:44px auto 0;}	
+	.topicontable{ margin:15px auto 0;}
+	.teamboxarea{width:100%;}
+	.teamboxtext{margin-bottom:80px;}
+	.bannerbtn{}
+	.bannertext{font-size:25px;}
+	.aboutuscon{font-size:22px;}
+	.sectionhead{margin:60px auto;}
+}
+
+@media only screen and (min-width: 640px) and (max-width: 768px) {
+   	.roadmaptable{width:600px;}
+	.roadmapcon{font-size:20px; margin:10px 0 50px 19px;}
+	.logobox{margin:44px auto 0;}
+	.topicontable{ margin:15px auto 0;}	
+	.teamboxarea{width:100%;}
+	.teamboxtext{margin-bottom:80px;}
+	.bannerbtn{margin:113px auto;}
+	.bannertext{font-size:25px;}
+	.aboutuscon{font-size:20px;}
+	.sectionhead{margin:60px auto;}
+}
+
+@media only screen and (min-width: 603px) and (max-width: 640px) {
+	.roadmaptable{width:580px;}
+	.roadmapcon{font-size:20px; margin:10px 0 50px 15px;}
+	.logobox{margin:44px auto 0;}	
+	.topicontable{ margin:15px auto 0;}
+	.teamboxarea{width:100%;}
+	.teamboxtext{margin-bottom:80px;}
+	.bannerbtn{margin:113px auto;}
+	.bannertext{font-size:25px;}
+	.aboutuscon{font-size:20px;}
+	.sectionhead{margin:60px auto;}
+}
+
+@media only screen and (min-width: 568px) and (max-width: 603px) {
+	.roadmaptable{width:100%; padding:0 10px;}
+	.roadmapcon{font-size:20px; margin:10px 0 20px 15px;}
+	.logobox{margin:44px auto 0;}
+	.topicontable{ margin:15px auto 0;}
+	.teamboxarea{width:100%;}
+	.teamboxtext{margin-bottom:80px;}
+	.bannerbtn{margin:113px auto;}
+	.bannertext{font-size:25px;}
+	.aboutuscon{font-size:20px;}
+	.sectionhead{margin:60px auto;}
+	
+}
+
+@media only screen and (min-width: 480px) and (max-width: 568px) {
+	.roadmaptable{width:100%; padding:0 10px;}
+	.roadmapcon{font-size:20px; margin:10px 0 20px 15px;}
+	.logobox{margin:0 auto 0;}
+	.topicontable{ margin:15px auto 0;}
+	.teamboxarea{width:100%;}
+	.teamboxtext{margin-bottom:80px;}
+	.bannerbtn{margin:100px auto;}
+	.bannertext{font-size:25px;}
+	.aboutuscon{font-size:20px;}
+	.sectionhead{margin:60px auto;}
+}
+
+@media only screen and (min-width: 360px) and (max-width: 480px) {
+	.roadmaptable{width:100%; padding:0 10px;}
+	.roadmapcon{font-size:20px; margin:10px 0 20px 15px;}
+	.logobox{margin:44px auto 0;}
+	.topicontable{ margin:15px auto 0;}
+	.teamboxarea{width:100%;}
+	.teamboxtext{margin-bottom:80px;}
+	.bannerbtn{margin:100px auto;}
+	.bannertext{font-size:18px;}
+	.aboutuscon{font-size:20px;}
+	.sectionhead{margin:50px auto;}
+}
+
+@media only screen and (min-width: 320px) and (max-width: 360px) {	
+	.roadmaptable{width:100%; padding:0 10px;}
+	.roadmapcon{font-size:16px; margin:10px 0 20px 15px;}
+	.logobox{margin:0 auto 0;}
+	.topicontable{ margin:0px auto 0;}
+	.teamboxarea{width:100%;}
+	.teamboxtext{margin-bottom:80px;padding:0 17px;}
+	.bannerbtn{margin:100px auto -80px;}
+	.bannertext{font-size:16px;}
+	.aboutuscon{font-size:16px;}
+	.sectionhead{margin:145px auto 23px;}
+}
+
+@media only screen and (min-width: 240px) and (max-width: 319px) {
+	.roadmaptable{width:100%; padding:0 10px;}
+	.roadmapcon{font-size:16px; margin:10px 0 20px 15px;}
+	.logobox{margin:44px auto 0;}
+	.topicontable{ margin:15px auto 0;}
+	.teamboxarea{width:100%;}
+	.teamboxtext{margin-bottom:80px;}
+	.bannerbtn{margin:100px auto;}
+	.bannertext{font-size:16px;}
+	.aboutuscon{font-size:16px;}
+	.sectionhead{margin:50px auto;}
+}
+
+/***** optional *****/
+
+@media only screen and (min-width: 150px) and (max-width: 239px) {
+
+}
