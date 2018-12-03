@@ -1,0 +1,301 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<title>Swirlds</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Swirlds</h1>
+
+<div class="code">
+<span class="comment">(*&nbsp;Copyright&nbsp;Swirlds&nbsp;Inc.&nbsp;2018&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+<a name="lab22"></a><h1 class="section">The Swirlds Hashgraph Consensus Algorithm</h1>
+
+---
+
+<div class="paragraph"> </div>
+
+  To read the formalism, you should read the files in the following
+  order.
+
+<div class="paragraph"> </div>
+
+<ul class="doclist">
+<li> <span class="inlinecode"><span class="id" title="library">Swirlds.HashGraph</span></span>
+
+</li>
+<li> <span class="inlinecode"><span class="id" title="library">Swirlds.Definitions</span></span>
+
+</li>
+<li> <span class="inlinecode"><span class="id" title="module">Swirlds.See</span></span>
+
+</li>
+<li> <span class="inlinecode"><span class="id" title="module">Swirlds.Round</span></span>
+
+</li>
+<li> <span class="inlinecode"><span class="id" title="module">Swirlds.Voting</span></span>
+
+</li>
+<li> <span class="inlinecode"><span class="id" title="module">Swirlds.Swirlds</span></span>
+
+</li>
+</ul>
+ 
+</div>
+<div class="code">
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Coq.Lists.List</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Coq.Bool.Bool</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Coq.Classes.Morphisms</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Coq.omega.Omega</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Coq.Sorting.Permutation</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="var">Coq.QArith.QArith</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Coq.Logic.Eqdep_dec</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Psatz</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ExtLib.Relations.TransitiveClosure</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ExtLib.Recur.Relation</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ExtLib.Recur.GenRec</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ExtLib.Recur.Facts</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ExtLib.Recur.Measure</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Swirlds.ToBool</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Swirlds.FixLib</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Swirlds.Pigeon</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Swirlds.Graph</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Swirlds.Util</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Swirlds.Math</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Swirlds.Lemmas</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Swirlds.HashGraph</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Swirlds.Sets</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Swirlds.Unique</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Swirlds.Tactics</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Swirlds.Definitions</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Swirlds.Voting</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">Swirlds</span> (<span class="id" title="var">HG</span> : <span class="id" title="var">HashGraph</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">HG.GO</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">HG</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Module</span> <span class="id" title="var">VOTE</span> := <span class="id" title="var">Voting</span> <span class="id" title="var">HG</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">VOTE.ROUND.SEE.DEFS</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">VOTE.ROUND.SEE</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">VOTE.ROUND</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Import</span> <span class="id" title="var">VOTE</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Class</span> <span class="id" title="var">G.Acyclic</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Hint Resolve</span> <span class="id" title="var">IsEdge_selfParent</span> <span class="id" title="var">IsNode_selfAncestor</span> <span class="id" title="var">IsNode_selfAncestor'</span> <span class="id" title="var">IsNode_consistent_selfParent</span> <span class="id" title="var">IsNode_Ancestor</span> <span class="id" title="var">IsNode_Ancestor'</span> : <span class="id" title="var">graph</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Hint Resolve</span> <span class="id" title="var">IsNode_rightTrans</span> <span class="id" title="var">IsNode_rightTrans'</span> : <span class="id" title="var">graph</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Instance</span> <span class="id" title="var">views_are_acyclic</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="var">Existing</span> <span class="id" title="keyword">Class</span> <span class="id" title="var">viewOf</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Section</span> <span class="id" title="var">theorems</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Variables</span> <span class="id" title="var">AB</span> <span class="id" title="var">A</span> <span class="id" title="var">B</span> : <span class="id" title="var">G.Graph</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Context</span> {<span class="id" title="var">Acyclic_AB</span> : <span class="id" title="var">G.Acyclic</span> <span class="id" title="var">AB</span>}.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Hypothesis</span> <span class="id" title="var">HviewA</span> : <span class="id" title="var">viewOf</span> <span class="id" title="var">AB</span> <span class="id" title="var">A</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Hypothesis</span> <span class="id" title="var">HviewB</span> : <span class="id" title="var">viewOf</span> <span class="id" title="var">AB</span> <span class="id" title="var">B</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;Event&nbsp;x&nbsp;in&nbsp;round&nbsp;r&nbsp;sends&nbsp;a&nbsp;vote&nbsp;v&nbsp;about&nbsp;y&nbsp;to&nbsp;event&nbsp;z&nbsp;in&nbsp;round&nbsp;r+1&nbsp;if&nbsp;and&nbsp;only&nbsp;if<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;x&nbsp;votes&nbsp;v&nbsp;about&nbsp;y&nbsp;and&nbsp;z&nbsp;strongly&nbsp;sees&nbsp;x.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">sendVote</span> (<span class="id" title="var">g</span> : <span class="id" title="var">G.Graph</span>) {<span class="id" title="var">Acyclic_g</span> : <span class="id" title="var">G.Acyclic</span> <span class="id" title="var">g</span>} (<span class="id" title="var">x</span> <span class="id" title="var">z</span> <span class="id" title="var">y</span> : <span class="id" title="var">E</span>) (<span class="id" title="var">v</span> : <span class="id" title="var">bool</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">vote</span> <span class="id" title="var">g</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> = <span class="id" title="var">v</span> /\ <span class="id" title="var">StronglySee</span> <span class="id" title="var">g</span> <span class="id" title="var">z</span> <span class="id" title="var">x</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Variable</span> <span class="id" title="var">Hhonest</span> : <span class="id" title="var">MostHonest</span> <span class="id" title="var">AB</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">consistent_viewOf</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span>, <span class="id" title="var">viewOf</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span> -&gt; <span class="id" title="var">consistent</span> <span class="id" title="var">b</span> <span class="id" title="var">a</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">symmetry</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">H</span>. <span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Lemma&nbsp;5.14.&nbsp;If&nbsp;hashgraphs&nbsp;A&nbsp;and&nbsp;B&nbsp;are&nbsp;consistent,&nbsp;and&nbsp;the&nbsp;algorithm&nbsp;running<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;on&nbsp;A&nbsp;shows&nbsp;that&nbsp;a&nbsp;round&nbsp;r&nbsp;event&nbsp;by&nbsp;member&nbsp;m0&nbsp;sends&nbsp;a&nbsp;vote&nbsp;vA&nbsp;to&nbsp;member&nbsp;m1&nbsp;in<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;round&nbsp;r&nbsp;+&nbsp;1,&nbsp;and&nbsp;the&nbsp;algorithm&nbsp;running&nbsp;on&nbsp;B&nbsp;shows&nbsp;that&nbsp;a&nbsp;round&nbsp;r&nbsp;event&nbsp;by&nbsp;member<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;m0&nbsp;sends&nbsp;a&nbsp;vote&nbsp;vB&nbsp;to&nbsp;an&nbsp;event&nbsp;by&nbsp;member&nbsp;m1&nbsp;in&nbsp;round&nbsp;r&nbsp;+&nbsp;1,&nbsp;then&nbsp;vA&nbsp;=&nbsp;vB&nbsp;.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Lemma&nbsp;5.14&nbsp;(revised).&nbsp;If&nbsp;hashgraphs&nbsp;A&nbsp;and&nbsp;B&nbsp;are&nbsp;consistent,&nbsp;and&nbsp;the<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;algorithm&nbsp;running&nbsp;on&nbsp;A&nbsp;shows&nbsp;that&nbsp;a&nbsp;round&nbsp;r&nbsp;witness&nbsp;by&nbsp;member&nbsp;m0&nbsp;sends&nbsp;a<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;vote&nbsp;vA&nbsp;to&nbsp;a&nbsp;witness&nbsp;by&nbsp;member&nbsp;m1&nbsp;in&nbsp;round&nbsp;r&nbsp;+&nbsp;1,&nbsp;and&nbsp;the&nbsp;algorithm<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;running&nbsp;on&nbsp;B&nbsp;shows&nbsp;that&nbsp;a&nbsp;round&nbsp;r&nbsp;witness&nbsp;by&nbsp;member&nbsp;m0&nbsp;sends&nbsp;a&nbsp;vote&nbsp;vB&nbsp;to<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;n&nbsp;witness&nbsp;by&nbsp;member&nbsp;m1&nbsp;in&nbsp;round&nbsp;r&nbsp;+&nbsp;1,&nbsp;then&nbsp;vA&nbsp;=&nbsp;vB.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Theorem</span> <span class="id" title="var">Consistent_Voting</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="keyword">forall</span> <span class="id" title="var">r</span> <span class="id" title="var">m0</span> <span class="id" title="var">vA</span> <span class="id" title="var">vB</span> <span class="id" title="var">z</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">NAz</span> : <span class="id" title="var">G.IsNode</span> <span class="id" title="var">A</span> <span class="id" title="var">z</span>) (<span class="id" title="var">NBz</span> : <span class="id" title="var">G.IsNode</span> <span class="id" title="var">B</span> <span class="id" title="var">z</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">exists</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span> : <span class="id" title="var">E</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">G.IsNode</span> <span class="id" title="var">A</span> <span class="id" title="var">a</span> /\ <span class="id" title="var">G.IsNode</span> <span class="id" title="var">A</span> <span class="id" title="var">b</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Witness&nbsp;A&nbsp;a&nbsp;/\&nbsp;*)</span> <span class="id" title="var">round</span> <span class="id" title="var">A</span> <span class="id" title="var">a</span> = <span class="id" title="var">r</span> /\ <span class="id" title="var">m0</span> = <span class="id" title="var">creator</span> <span class="id" title="var">a</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Witness&nbsp;A&nbsp;b&nbsp;/\&nbsp;round&nbsp;A&nbsp;b&nbsp;=&nbsp;r&nbsp;+&nbsp;1&nbsp;/\&nbsp;m1&nbsp;=&nbsp;creator&nbsp;b&nbsp;/\&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sendVote</span> <span class="id" title="var">A</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span> <span class="id" title="var">z</span> <span class="id" title="var">vA</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">exists</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span> : <span class="id" title="var">E</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">G.IsNode</span> <span class="id" title="var">B</span> <span class="id" title="var">a</span> /\ <span class="id" title="var">G.IsNode</span> <span class="id" title="var">B</span> <span class="id" title="var">b</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Witness&nbsp;B&nbsp;a&nbsp;/\&nbsp;*)</span> <span class="id" title="var">round</span> <span class="id" title="var">B</span> <span class="id" title="var">a</span> = <span class="id" title="var">r</span> /\ <span class="id" title="var">m0</span> = <span class="id" title="var">creator</span> <span class="id" title="var">a</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Witness&nbsp;B&nbsp;b&nbsp;/\&nbsp;round&nbsp;B&nbsp;b&nbsp;=&nbsp;r&nbsp;+&nbsp;1&nbsp;/\&nbsp;m1&nbsp;=&nbsp;creator&nbsp;b&nbsp;/\&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">sendVote</span> <span class="id" title="var">B</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span> <span class="id" title="var">z</span> <span class="id" title="var">vB</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">vA</span> = <span class="id" title="var">vB</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [ <span class="id" title="var">Aa</span> [ <span class="id" title="var">Ab</span> [ <span class="id" title="var">NAa</span> [ <span class="id" title="var">NAb</span> ? ] ] ] ].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H0</span> <span class="id" title="keyword">as</span> [ <span class="id" title="var">Ba</span> [ <span class="id" title="var">Bb</span> [ <span class="id" title="var">NBa</span> [ <span class="id" title="var">NBb</span> ? ] ] ] ].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">shatter</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">shatter</span> <span class="id" title="var">H0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H3</span> <span class="id" title="keyword">as</span> [ ? <span class="id" title="var">HAsee</span> ].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H5</span> <span class="id" title="keyword">as</span> [ ? <span class="id" title="var">HBsee</span> ].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">assert</span> (~<span class="id" title="var">Forked</span> <span class="id" title="var">AB</span> <span class="id" title="var">Ba</span> <span class="id" title="var">Aa</span>) <span class="id" title="keyword">as</span> <span class="id" title="var">HForked</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="comment">(*&nbsp;by&nbsp;the&nbsp;strongly&nbsp;seeing&nbsp;lemma&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intro</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">Strongly_Seeing</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6: <span class="id" title="tactic">eexists</span>; <span class="id" title="var">eassumption</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">eexists</span>; <span class="id" title="var">eassumption</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">all</span>: <span class="id" title="tactic">eauto</span> <span class="id" title="keyword">using</span> <span class="id" title="var">IsNode_StronglySee'</span> <span class="id" title="keyword">with</span> <span class="id" title="var">typeclass_instances</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">not_Forked</span> <span class="id" title="tactic">in</span> <span class="id" title="var">HForked</span>; <span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">HForked</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">congruence</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">erewrite</span> <span class="id" title="var">consistent_vote</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">l</span>:=<span class="id" title="var">A</span>) (<span class="id" title="var">r</span>:=<span class="id" title="var">AB</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eauto</span> <span class="id" title="keyword">using</span> <span class="id" title="var">consistent_viewOf</span>, <span class="id" title="var">IsNode_viewOf</span>, <span class="id" title="var">IsNode_StronglySee</span>, <span class="id" title="var">IsNode_StronglySee'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">erewrite</span> <span class="id" title="var">consistent_vote</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">l</span>:=<span class="id" title="var">B</span>) (<span class="id" title="var">r</span>:=<span class="id" title="var">AB</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eauto</span> <span class="id" title="keyword">using</span> <span class="id" title="var">consistent_viewOf</span>, <span class="id" title="var">IsNode_viewOf</span>, <span class="id" title="var">IsNode_StronglySee</span>, <span class="id" title="var">IsNode_StronglySee'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">symmetry</span>; <span class="id" title="tactic">eapply</span> <span class="id" title="var">single_source_of_vote</span>; <span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">erewrite</span> <span class="id" title="var">consistent_round</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">l</span>:=<span class="id" title="var">AB</span>)(<span class="id" title="var">r</span>:=<span class="id" title="var">B</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eauto</span> <span class="id" title="keyword">using</span> <span class="id" title="var">consistent_viewOf</span>, <span class="id" title="var">IsNode_viewOf</span>, <span class="id" title="var">IsNode_StronglySee</span>, <span class="id" title="var">IsNode_StronglySee'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">erewrite</span> <span class="id" title="var">consistent_round</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">l</span>:=<span class="id" title="var">AB</span>)(<span class="id" title="var">r</span>:=<span class="id" title="var">A</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eauto</span> <span class="id" title="keyword">using</span> <span class="id" title="var">consistent_viewOf</span>, <span class="id" title="var">IsNode_viewOf</span>, <span class="id" title="var">IsNode_StronglySee</span>, <span class="id" title="var">IsNode_StronglySee'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">HviewA</span>. <span class="id" title="tactic">eapply</span> <span class="id" title="var">HviewB</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">eapply</span> <span class="id" title="var">single_source_of_vote</span>; <span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">erewrite</span> <span class="id" title="var">consistent_round</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">l</span>:=<span class="id" title="var">AB</span>)(<span class="id" title="var">r</span>:=<span class="id" title="var">A</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eauto</span> <span class="id" title="keyword">using</span> <span class="id" title="var">consistent_viewOf</span>, <span class="id" title="var">IsNode_viewOf</span>, <span class="id" title="var">IsNode_StronglySee</span>, <span class="id" title="var">IsNode_StronglySee'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">erewrite</span> <span class="id" title="var">consistent_round</span> <span class="id" title="keyword">with</span> (<span class="id" title="var">l</span>:=<span class="id" title="var">AB</span>)(<span class="id" title="var">r</span>:=<span class="id" title="var">B</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eauto</span> <span class="id" title="keyword">using</span> <span class="id" title="var">consistent_viewOf</span>, <span class="id" title="var">IsNode_viewOf</span>, <span class="id" title="var">IsNode_StronglySee</span>, <span class="id" title="var">IsNode_StronglySee'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">HviewB</span>. <span class="id" title="tactic">eapply</span> <span class="id" title="var">HviewA</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Lemma&nbsp;5.15.&nbsp;If&nbsp;hashgraphs&nbsp;A&nbsp;and&nbsp;B&nbsp;are&nbsp;consistent,&nbsp;and&nbsp;A&nbsp;decides&nbsp;a<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;Byzantine&nbsp;agreement&nbsp;election&nbsp;with&nbsp;result&nbsp;v&nbsp;in&nbsp;round&nbsp;r&nbsp;and&nbsp;B&nbsp;has&nbsp;not<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;decided&nbsp;prior&nbsp;to&nbsp;r,&nbsp;then&nbsp;B&nbsp;will&nbsp;decide&nbsp;v&nbsp;in&nbsp;round&nbsp;r&nbsp;+&nbsp;2&nbsp;or&nbsp;before.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Theorem</span> <span class="id" title="var">thm515</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="keyword">forall</span> <span class="id" title="var">r</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> <span class="id" title="var">v</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">round</span> <span class="id" title="var">A</span> <span class="id" title="var">x</span> = <span class="id" title="var">r</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">decide</span> <span class="id" title="var">A</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> = <span class="id" title="var">true</span> -&gt; <span class="id" title="var">vote</span> <span class="id" title="var">A</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> = <span class="id" title="var">v</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">exists</span> <span class="id" title="var">z</span>, <span class="id" title="var">G.IsNode</span> <span class="id" title="var">B</span> <span class="id" title="var">z</span> /\ <span class="id" title="var">round</span> <span class="id" title="var">B</span> <span class="id" title="var">z</span> = <span class="id" title="var">r</span> + 2) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">w</span>, <span class="id" title="var">round</span> <span class="id" title="var">B</span> <span class="id" title="var">w</span> &lt;= <span class="id" title="var">r</span> + 2 /\ <span class="id" title="var">decide</span> <span class="id" title="var">B</span> <span class="id" title="var">w</span> <span class="id" title="var">y</span> = <span class="id" title="var">true</span> /\ <span class="id" title="var">vote</span> <span class="id" title="var">B</span> <span class="id" title="var">w</span> <span class="id" title="var">y</span> = <span class="id" title="var">v</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Abort</span>. <span class="comment">(*&nbsp;TODO&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Theorem&nbsp;5.16.&nbsp;For&nbsp;any&nbsp;single&nbsp;YES/NO&nbsp;question,&nbsp;consensus&nbsp;is&nbsp;achieved<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;eventually&nbsp;with&nbsp;probability&nbsp;1.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Theorem</span> <span class="id" title="var">thm516</span> :  <span class="id" title="var">True</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;NOTE:&nbsp;This&nbsp;is&nbsp;a&nbsp;placeholder&nbsp;for&nbsp;this&nbsp;theorem&nbsp;since&nbsp;we&nbsp;don't&nbsp;have<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;proabability&nbsp;formalized&nbsp;appropriately&nbsp;yet.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Abort</span>. <span class="comment">(*&nbsp;Place&nbsp;holder&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Lemma&nbsp;5.17.&nbsp;For&nbsp;any&nbsp;round&nbsp;number&nbsp;r,&nbsp;for&nbsp;any&nbsp;hashgraph&nbsp;that&nbsp;has&nbsp;at&nbsp;least<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;one&nbsp;event&nbsp;in&nbsp;round&nbsp;r&nbsp;+3,&nbsp;there&nbsp;will&nbsp;be&nbsp;at&nbsp;least&nbsp;one&nbsp;witness&nbsp;in&nbsp;round&nbsp;r<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;that&nbsp;will&nbsp;be&nbsp;decided&nbsp;to&nbsp;be&nbsp;famous&nbsp;by&nbsp;the&nbsp;consensus&nbsp;algorithm,&nbsp;and&nbsp;this<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;decision&nbsp;will&nbsp;be&nbsp;made&nbsp;by&nbsp;every&nbsp;witness&nbsp;in&nbsp;round&nbsp;r&nbsp;+&nbsp;3,&nbsp;or&nbsp;earlier.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Theorem</span> <span class="id" title="var">thm517</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="keyword">forall</span> <span class="id" title="var">r</span>, <span class="id" title="var">r</span> &gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">exists</span> <span class="id" title="var">x</span>, <span class="id" title="var">round</span> <span class="id" title="var">A</span> <span class="id" title="var">x</span> = <span class="id" title="var">r</span> + 3) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">x</span>, <span class="id" title="var">Witness</span> <span class="id" title="var">A</span> <span class="id" title="var">x</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id" title="var">round</span> <span class="id" title="var">A</span> <span class="id" title="var">x</span> = <span class="id" title="var">r</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ <span class="id" title="var">Famous</span> <span class="id" title="var">A</span> <span class="id" title="var">x</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/\ (<span class="id" title="keyword">forall</span> <span class="id" title="var">y</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Witness</span> <span class="id" title="var">A</span> <span class="id" title="var">y</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">round</span> <span class="id" title="var">A</span> <span class="id" title="var">y</span> = <span class="id" title="var">r</span> + 3 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">decide</span> <span class="id" title="var">A</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> = <span class="id" title="var">true</span> /\ <span class="id" title="var">vote</span> <span class="id" title="var">A</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> = <span class="id" title="var">true</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Abort</span>. <span class="comment">(*&nbsp;TODO&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;A&nbsp;has&nbsp;exactly&nbsp;one&nbsp;more&nbsp;node&nbsp;than&nbsp;B&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">ExtendsByOne</span> (<span class="id" title="var">A</span> <span class="id" title="var">B</span> : <span class="id" title="var">G.Graph</span>) (<span class="id" title="var">x</span> : <span class="id" title="var">E</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">G.IsNode</span> <span class="id" title="var">A</span> <span class="id" title="var">x</span> /\ ~<span class="id" title="var">G.IsNode</span> <span class="id" title="var">B</span> <span class="id" title="var">x</span> /\<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">y</span>, <span class="id" title="var">G.IsNode</span> <span class="id" title="var">A</span> <span class="id" title="var">y</span> -&gt; ~<span class="id" title="var">G.IsNode</span> <span class="id" title="var">B</span> <span class="id" title="var">y</span> -&gt; <span class="id" title="var">x</span> = <span class="id" title="var">y</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Lemma&nbsp;5.18.&nbsp;If&nbsp;hashgraph&nbsp;A&nbsp;does&nbsp;not&nbsp;contain&nbsp;event&nbsp;x,&nbsp;but&nbsp;does&nbsp;contain&nbsp;all<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;the&nbsp;parents&nbsp;of&nbsp;x,&nbsp;and&nbsp;hashgraph&nbsp;B&nbsp;is&nbsp;the&nbsp;result&nbsp;of&nbsp;adding&nbsp;x&nbsp;to&nbsp;A,&nbsp;and&nbsp;x<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;is&nbsp;a&nbsp;witness&nbsp;created&nbsp;in&nbsp;round&nbsp;r,&nbsp;and&nbsp;A&nbsp;has&nbsp;at&nbsp;least&nbsp;one&nbsp;witness&nbsp;in&nbsp;round<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;r&nbsp;whose&nbsp;fame&nbsp;has&nbsp;been&nbsp;decided&nbsp;(as&nbsp;either&nbsp;famous&nbsp;or&nbsp;as&nbsp;not&nbsp;famous),&nbsp;then&nbsp;x<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;will&nbsp;be&nbsp;decided&nbsp;as&nbsp;“not&nbsp;famous”&nbsp;in&nbsp;B.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Theorem</span> <span class="id" title="var">thm518</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;: <span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">r</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">ExtendsByOne</span> <span class="id" title="var">B</span> <span class="id" title="var">A</span> <span class="id" title="var">x</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Witness</span> <span class="id" title="var">B</span> <span class="id" title="var">x</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">round</span> <span class="id" title="var">B</span> <span class="id" title="var">x</span> = <span class="id" title="var">r</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">exists</span> <span class="id" title="var">y</span>, <span class="id" title="var">Witness</span> <span class="id" title="var">A</span> <span class="id" title="var">y</span> /\ <span class="id" title="var">round</span> <span class="id" title="var">A</span> <span class="id" title="var">y</span> = <span class="id" title="var">r</span> /\ <span class="id" title="tactic">exists</span> <span class="id" title="var">z</span>, <span class="id" title="var">decide</span> <span class="id" title="var">A</span> <span class="id" title="var">z</span> <span class="id" title="var">y</span> = <span class="id" title="var">true</span>) -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">y</span>, <span class="id" title="var">decide</span> <span class="id" title="var">B</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span> = <span class="id" title="var">true</span> /\ ~<span class="id" title="var">Famous</span> <span class="id" title="var">B</span> <span class="id" title="var">x</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Abort</span>. <span class="comment">(*&nbsp;TODO&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;Theorem&nbsp;5.19&nbsp;(Byzantine&nbsp;Fault&nbsp;Tolerance&nbsp;Theorem).&nbsp;Each&nbsp;event&nbsp;x&nbsp;created&nbsp;by<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;an&nbsp;honest&nbsp;member&nbsp;will&nbsp;eventually&nbsp;be&nbsp;assigned&nbsp;a&nbsp;consensus&nbsp;position&nbsp;in&nbsp;the<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;total&nbsp;order&nbsp;of&nbsp;events,&nbsp;with&nbsp;probability&nbsp;1.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Theorem</span> <span class="id" title="var">thm519</span> : <span class="id" title="var">True</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment">(*&nbsp;NOTE:&nbsp;This&nbsp;is&nbsp;a&nbsp;placeholder&nbsp;for&nbsp;this&nbsp;theorem&nbsp;since&nbsp;we&nbsp;don't&nbsp;have<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;proabability&nbsp;formalized&nbsp;appropriately&nbsp;yet.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*)</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">Abort</span>. <span class="comment">(*&nbsp;Placeholder&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">End</span> <span class="id" title="var">theorems</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">Swirlds</span>.<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="indexpage.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

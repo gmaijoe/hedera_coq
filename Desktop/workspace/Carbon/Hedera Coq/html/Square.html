@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<title>Square</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Square</h1>
+
+<div class="code">
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <a class="idref" href="http://coq.inria.fr/distrib/8.7.1/stdlib//Coq.Lists.List.html#"><span class="id" title="library">Coq.Lists.List</span></a>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">Swirlds.Graph</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="library">Swirlds.SimpleGraphImpl</span>.<br/>
+<span class="id" title="keyword">Module</span> <a name="SG"><span class="id" title="module">SG</span></a> := <span class="id" title="module">SimpleGraph</span> <span class="id" title="module">Has_EqDec_Nat</span>.<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="keyword">Import</span> <a name="Ops"><span class="id" title="module">Ops</span></a> := <span class="id" title="module">GraphOpsDep</span> <a class="idref" href="Square.html#SG"><span class="id" title="module">SG</span></a> <span class="id" title="module">Has_EqDec_Nat</span>.<br/>
+
+<br/>
+<span class="comment">(*&nbsp;Example:&nbsp;Square&nbsp;**********************************************************<br/>
+<br/>
+&nbsp;&nbsp;0&nbsp;---&gt;&nbsp;1<br/>
+&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|<br/>
+&nbsp;\|/&nbsp;&nbsp;&nbsp;&nbsp;\|/<br/>
+&nbsp;&nbsp;2&nbsp;---&gt;&nbsp;3<br/>
+<br/>
+*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="squareN"><span class="id" title="definition">squareN</span></a> := 0<a class="idref" href="http://coq.inria.fr/distrib/8.7.1/stdlib//Coq.Init.Datatypes.html#0a8150c3c4df34d205c5ed9a427e2ed5"><span class="id" title="notation">::</span></a>1<a class="idref" href="http://coq.inria.fr/distrib/8.7.1/stdlib//Coq.Init.Datatypes.html#0a8150c3c4df34d205c5ed9a427e2ed5"><span class="id" title="notation">::</span></a>2<a class="idref" href="http://coq.inria.fr/distrib/8.7.1/stdlib//Coq.Init.Datatypes.html#0a8150c3c4df34d205c5ed9a427e2ed5"><span class="id" title="notation">::</span></a>3<a class="idref" href="http://coq.inria.fr/distrib/8.7.1/stdlib//Coq.Init.Datatypes.html#0a8150c3c4df34d205c5ed9a427e2ed5"><span class="id" title="notation">::</span></a><a class="idref" href="http://coq.inria.fr/distrib/8.7.1/stdlib//Coq.Init.Datatypes.html#nil"><span class="id" title="constructor">nil</span></a>.<br/>
+<span class="id" title="keyword">Definition</span> <a name="squareE"><span class="id" title="definition">squareE</span></a> := <span class="id" title="keyword">fun</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span> =&gt; <span class="id" title="keyword">match</span> <a class="idref" href="Square.html#n"><span class="id" title="variable">n</span></a> , <a class="idref" href="Square.html#m"><span class="id" title="variable">m</span></a> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| 0 , 1 =&gt; <a class="idref" href="http://coq.inria.fr/distrib/8.7.1/stdlib//Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| 0 , 2 =&gt; <a class="idref" href="http://coq.inria.fr/distrib/8.7.1/stdlib//Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| 1 , 3 =&gt; <a class="idref" href="http://coq.inria.fr/distrib/8.7.1/stdlib//Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| 2 , 3 =&gt; <a class="idref" href="http://coq.inria.fr/distrib/8.7.1/stdlib//Coq.Init.Datatypes.html#true"><span class="id" title="constructor">true</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">_</span> , <span class="id" title="var">_</span> =&gt; <a class="idref" href="http://coq.inria.fr/distrib/8.7.1/stdlib//Coq.Init.Datatypes.html#false"><span class="id" title="constructor">false</span></a><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="square"><span class="id" title="definition">square</span></a> := <a class="idref" href="Square.html#mkGraph"><span class="id" title="constructor">SG.mkGraph</span></a> <a class="idref" href="Square.html#squareN"><span class="id" title="definition">squareN</span></a> <a class="idref" href="Square.html#squareE"><span class="id" title="definition">squareE</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="Acyclic_square"><span class="id" title="definition">Acyclic_square</span></a> : <a class="idref" href="Square.html#Acyclic"><span class="id" title="definition">SG.Acyclic</span></a> <a class="idref" href="Square.html#square"><span class="id" title="definition">square</span></a> :=<br/>
+&nbsp;&nbsp;<a class="idref" href="Square.html#get_acyclic"><span class="id" title="definition">get_acyclic</span></a> <a class="idref" href="Square.html#square"><span class="id" title="definition">square</span></a> <a class="idref" href="http://coq.inria.fr/distrib/8.7.1/stdlib//Coq.Init.Logic.html#I"><span class="id" title="constructor">I</span></a>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="squareAns"><span class="id" title="definition">squareAns</span></a> <span class="id" title="var">n</span> := <a class="idref" href="Square.html#ancestorsOf"><span class="id" title="definition">ancestorsOf</span></a> <a class="idref" href="Square.html#square"><span class="id" title="definition">square</span></a> <a class="idref" href="Square.html#Acyclic_square"><span class="id" title="definition">Acyclic_square</span></a> <a class="idref" href="Square.html#n"><span class="id" title="variable">n</span></a>.<br/>
+<span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <a class="idref" href="Square.html#squareAns"><span class="id" title="definition">squareAns</span></a> 0. <span class="comment">(*&nbsp;nil&nbsp;*)</span><br/>
+<span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <a class="idref" href="Square.html#squareAns"><span class="id" title="definition">squareAns</span></a> 1. <span class="comment">(*&nbsp;0&nbsp;::&nbsp;nil&nbsp;*)</span><br/>
+<span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <a class="idref" href="Square.html#squareAns"><span class="id" title="definition">squareAns</span></a> 2. <span class="comment">(*&nbsp;0&nbsp;::&nbsp;nil&nbsp;*)</span><br/>
+<span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <a class="idref" href="Square.html#squareAns"><span class="id" title="definition">squareAns</span></a> 3. <span class="comment">(*&nbsp;&nbsp;0&nbsp;::&nbsp;1&nbsp;::&nbsp;2&nbsp;::&nbsp;nil&nbsp;*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="squareGens"><span class="id" title="definition">squareGens</span></a> <span class="id" title="var">n</span> := <a class="idref" href="Square.html#generationOf"><span class="id" title="definition">generationOf</span></a> <a class="idref" href="Square.html#square"><span class="id" title="definition">square</span></a> <a class="idref" href="Square.html#Acyclic_square"><span class="id" title="definition">Acyclic_square</span></a> <a class="idref" href="Square.html#n"><span class="id" title="variable">n</span></a>.<br/>
+<span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <a class="idref" href="Square.html#squareGens"><span class="id" title="definition">squareGens</span></a> 0. <span class="comment">(*&nbsp;0&nbsp;*)</span><br/>
+<span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <a class="idref" href="Square.html#squareGens"><span class="id" title="definition">squareGens</span></a> 1. <span class="comment">(*&nbsp;1&nbsp;*)</span><br/>
+<span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <a class="idref" href="Square.html#squareGens"><span class="id" title="definition">squareGens</span></a> 2. <span class="comment">(*&nbsp;1&nbsp;*)</span><br/>
+<span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <a class="idref" href="Square.html#squareGens"><span class="id" title="definition">squareGens</span></a> 3. <span class="comment">(*&nbsp;2&nbsp;*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <a name="squareRoots"><span class="id" title="definition">squareRoots</span></a> <span class="id" title="var">n</span> := <a class="idref" href="Square.html#aRootOf"><span class="id" title="definition">aRootOf</span></a> <a class="idref" href="Square.html#square"><span class="id" title="definition">square</span></a> <a class="idref" href="Square.html#Acyclic_square"><span class="id" title="definition">Acyclic_square</span></a> <a class="idref" href="Square.html#n"><span class="id" title="variable">n</span></a>.<br/>
+<span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <a class="idref" href="Square.html#squareRoots"><span class="id" title="definition">squareRoots</span></a> 0. <span class="comment">(*&nbsp;0&nbsp;*)</span><br/>
+<span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <a class="idref" href="Square.html#squareRoots"><span class="id" title="definition">squareRoots</span></a> 1. <span class="comment">(*&nbsp;0&nbsp;*)</span><br/>
+<span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <a class="idref" href="Square.html#squareRoots"><span class="id" title="definition">squareRoots</span></a> 2. <span class="comment">(*&nbsp;0&nbsp;*)</span><br/>
+<span class="id" title="keyword">Eval</span> <span class="id" title="keyword">vm_compute</span> <span class="id" title="tactic">in</span> <a class="idref" href="Square.html#squareRoots"><span class="id" title="definition">squareRoots</span></a> 3. <span class="comment">(*&nbsp;0&nbsp;*)</span><br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="indexpage.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

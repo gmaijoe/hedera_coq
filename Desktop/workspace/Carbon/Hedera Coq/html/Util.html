@@ -1,0 +1,229 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<title>Util</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Util</h1>
+
+<div class="code">
+<span class="comment">(*&nbsp;Copyright&nbsp;Swirlds&nbsp;Inc&nbsp;2018&nbsp;*)</span><br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Coq.Lists.List</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Coq.Bool.Bool</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Coq.Classes.Morphisms</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Coq.Classes.Equivalence</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Coq.Classes.EquivDec</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="var">with_prop</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Context</span> {<span class="id" title="var">T</span> : <span class="id" title="keyword">Type</span>} (<span class="id" title="var">P</span> : <span class="id" title="var">T</span> -&gt; <span class="id" title="keyword">Prop</span>) .<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">with_prop</span> (<span class="id" title="var">ls</span> : <span class="id" title="var">list</span> <span class="id" title="var">T</span>) {<span class="id" title="keyword">struct</span> <span class="id" title="var">ls</span>}<br/>
+&nbsp;&nbsp;: (<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span>, <span class="id" title="var">In</span> <span class="id" title="var">x</span> <span class="id" title="var">ls</span> -&gt; <span class="id" title="var">P</span> <span class="id" title="var">x</span>) -&gt; <span class="id" title="var">list</span> { <span class="id" title="var">x</span> : <span class="id" title="var">T</span> | <span class="id" title="var">P</span> <span class="id" title="var">x</span> } :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">ls</span> <span class="id" title="keyword">as</span> <span class="id" title="var">ls</span> <span class="id" title="keyword">return</span> (<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span>, <span class="id" title="var">In</span> <span class="id" title="var">x</span> <span class="id" title="var">ls</span> -&gt; <span class="id" title="var">P</span> <span class="id" title="var">x</span>) -&gt; <span class="id" title="var">list</span> { <span class="id" title="var">x</span> : <span class="id" title="var">T</span> | <span class="id" title="var">P</span> <span class="id" title="var">x</span> } <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">nil</span> =&gt; <span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">nil</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">l</span> :: <span class="id" title="var">ls</span> =&gt; <span class="id" title="keyword">fun</span> <span class="id" title="var">pf</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@<span class="id" title="var">exist</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">l</span> (<span class="id" title="var">pf</span> <span class="id" title="var">_</span> (<span class="id" title="var">or_introl</span> <span class="id" title="var">Logic.eq_refl</span>)) :: <span class="id" title="var">with_prop</span> <span class="id" title="var">ls</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">x</span> <span class="id" title="var">z</span> =&gt; <span class="id" title="var">pf</span> <span class="id" title="var">_</span> (<span class="id" title="var">or_intror</span> <span class="id" title="var">z</span>))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">with_prop</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+TODO: This should live somewhere already 
+</div>
+<div class="code">
+<span class="id" title="keyword">Class</span> <span class="id" title="var">Equiv</span> (<span class="id" title="var">T</span> : <span class="id" title="keyword">Type</span>) : <span class="id" title="keyword">Type</span> :=<br/>
+{ <span class="id" title="var">equiv</span> : <span class="id" title="var">T</span> -&gt; <span class="id" title="var">T</span> -&gt; <span class="id" title="keyword">Prop</span><br/>
+; <span class="id" title="var">Equivalence_equiv</span> :&gt; <span class="id" title="var">Equivalence</span> <span class="id" title="var">equiv</span> }.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+TODO: This should live somewhere already 
+</div>
+<div class="code">
+<span class="id" title="keyword">Class</span> <span class="id" title="var">EqDec</span> (<span class="id" title="var">T</span> : <span class="id" title="keyword">Type</span>) : <span class="id" title="keyword">Type</span> :=<br/>
+{ <span class="id" title="var">eq_dec</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span> : <span class="id" title="var">T</span>, {<span class="id" title="var">a</span> = <span class="id" title="var">b</span>} + {<span class="id" title="var">a</span> &lt;&gt; <span class="id" title="var">b</span>} }.<br/>
+
+<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ListSet</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+TODO: Use MSets. 
+</div>
+<div class="code">
+<span class="id" title="keyword">Section</span> <span class="id" title="var">set_ops</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Context</span> {<span class="id" title="var">T</span> : <span class="id" title="keyword">Type</span>}.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Context</span> {<span class="id" title="var">Eq_dec</span> : <span class="id" title="var">EqDec</span> <span class="id" title="var">T</span>}.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Fixpoint</span> <span class="id" title="var">set_unions</span> (<span class="id" title="var">ls</span> : <span class="id" title="var">list</span> (<span class="id" title="tactic">set</span> <span class="id" title="var">T</span>)) : <span class="id" title="tactic">set</span> <span class="id" title="var">T</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">ls</span> <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">nil</span> =&gt; <span class="id" title="var">nil</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">l</span> :: <span class="id" title="var">ls</span> =&gt; <span class="id" title="var">set_union</span> <span class="id" title="var">eq_dec</span> <span class="id" title="var">l</span> (<span class="id" title="var">set_unions</span> <span class="id" title="var">ls</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Theorem</span> <span class="id" title="var">set_unions_In</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> (<span class="id" title="var">xss</span> : <span class="id" title="var">list</span> (<span class="id" title="tactic">set</span> <span class="id" title="var">T</span>)),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">exists</span> <span class="id" title="var">xs</span>, <span class="id" title="var">In</span> <span class="id" title="var">xs</span> <span class="id" title="var">xss</span> /\ <span class="id" title="var">In</span> <span class="id" title="var">x</span> <span class="id" title="var">xs</span>) &lt;-&gt; <span class="id" title="var">In</span> <span class="id" title="var">x</span> (<span class="id" title="var">set_unions</span> <span class="id" title="var">xss</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">xss</span>; <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">split</span>; <span class="id" title="tactic">try</span> <span class="id" title="tactic">tauto</span>. <span class="id" title="tactic">destruct</span> 1. <span class="id" title="tactic">tauto</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">rewrite</span> <span class="id" title="var">set_union_iff</span>. <span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">IHxss</span>; <span class="id" title="tactic">clear</span> <span class="id" title="var">IHxss</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">destruct</span> 1. <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span>; <span class="id" title="tactic">tauto</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">destruct</span> 1.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">exists</span> <span class="id" title="var">a</span>. <span class="id" title="tactic">tauto</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">exists</span> <span class="id" title="var">x0</span>. <span class="id" title="tactic">tauto</span>. } } }<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">set_ops</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+NOTE: This simplifies a lot of definitions! 
+</div>
+<div class="code">
+<span class="id" title="keyword">Section</span> <span class="id" title="var">Fix_ind</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Context</span> {<span class="id" title="var">A</span>} {<span class="id" title="var">R</span> : <span class="id" title="var">A</span> -&gt; <span class="id" title="var">A</span> -&gt; <span class="id" title="keyword">Prop</span>} (<span class="id" title="keyword">wf</span> : <span class="id" title="var">well_founded</span> <span class="id" title="var">R</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">Ret</span> : <span class="id" title="var">A</span> -&gt; <span class="id" title="keyword">Type</span>) (<span class="id" title="keyword">rec</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> : <span class="id" title="var">A</span>, (<span class="id" title="keyword">forall</span> <span class="id" title="var">y</span> : <span class="id" title="var">A</span>, <span class="id" title="var">R</span> <span class="id" title="var">y</span> <span class="id" title="var">x</span> -&gt; <span class="id" title="var">Ret</span> <span class="id" title="var">y</span>) -&gt; <span class="id" title="var">Ret</span> <span class="id" title="var">x</span>) (<span class="id" title="var">P</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">x</span>, <span class="id" title="var">Ret</span> <span class="id" title="var">x</span> -&gt; <span class="id" title="keyword">Prop</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Hypothesis</span> <span class="id" title="var">Hrec</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">f</span>, (<span class="id" title="keyword">forall</span> <span class="id" title="var">y</span>, <span class="id" title="var">R</span> <span class="id" title="var">y</span> <span class="id" title="var">x</span> -&gt; <span class="id" title="var">P</span> <span class="id" title="var">y</span> (<span class="id" title="var">f</span> <span class="id" title="var">y</span>)) -&gt; <span class="id" title="var">P</span> <span class="id" title="var">x</span> (<span class="id" title="keyword">rec</span> <span class="id" title="var">x</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">y</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">f</span> <span class="id" title="var">y</span>)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Hypothesis</span> <span class="id" title="var">Proper_rec</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">x</span> <span class="id" title="var">f</span> <span class="id" title="var">g</span>, (<span class="id" title="keyword">forall</span> <span class="id" title="var">y</span> <span class="id" title="var">z</span>, <span class="id" title="var">f</span> <span class="id" title="var">y</span> <span class="id" title="var">z</span> = <span class="id" title="var">g</span> <span class="id" title="var">y</span> <span class="id" title="var">z</span>) -&gt; <span class="id" title="keyword">rec</span> <span class="id" title="var">x</span> <span class="id" title="var">f</span> = <span class="id" title="keyword">rec</span> <span class="id" title="var">x</span> <span class="id" title="var">g</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Theorem</span> <span class="id" title="var">Fix_ind</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">x</span>, <span class="id" title="var">P</span> <span class="id" title="var">x</span> (@<span class="id" title="keyword">Fix</span> <span class="id" title="var">A</span> <span class="id" title="var">R</span> <span class="id" title="keyword">wf</span> <span class="id" title="var">Ret</span> <span class="id" title="keyword">rec</span> <span class="id" title="var">x</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">refine</span> (@<span class="id" title="keyword">Fix</span> <span class="id" title="var">A</span> <span class="id" title="var">R</span> <span class="id" title="keyword">wf</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">x</span> =&gt; <span class="id" title="var">P</span> <span class="id" title="var">x</span> (<span class="id" title="keyword">Fix</span> <span class="id" title="keyword">wf</span> <span class="id" title="var">Ret</span> <span class="id" title="keyword">rec</span> <span class="id" title="var">x</span>)) <span class="id" title="var">_</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Init.Wf.Fix_eq</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">eapply</span> <span class="id" title="var">Hrec</span>. <span class="id" title="tactic">assumption</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">exact</span> <span class="id" title="var">Proper_rec</span>. }<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Defined</span>.<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">Fix_ind</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">anyb</span> : <span class="id" title="var">list</span> <span class="id" title="var">bool</span> -&gt; <span class="id" title="var">bool</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="var">List.fold_right</span> <span class="id" title="var">orb</span> <span class="id" title="var">false</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">negb_true_not</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">b</span>, <span class="id" title="var">negb</span> <span class="id" title="var">b</span> = <span class="id" title="var">true</span> -&gt; (<span class="id" title="var">b</span> = <span class="id" title="var">true</span> -&gt; <span class="id" title="var">False</span>).<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">b</span>; <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">congruence</span>. <span class="id" title="tactic">congruence</span>. <span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">negb_true_iff</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">a</span>, <span class="id" title="var">negb</span> <span class="id" title="var">a</span> = <span class="id" title="var">true</span> &lt;-&gt; <span class="id" title="var">not</span> (<span class="id" title="var">a</span> = <span class="id" title="var">true</span>).<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">a</span>; <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">split</span>; <span class="id" title="tactic">congruence</span>. <span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">anyb_false_map</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">xs</span>, <span class="id" title="var">anyb</span> <span class="id" title="var">xs</span> = <span class="id" title="var">false</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">forallb</span> <span class="id" title="var">negb</span> <span class="id" title="var">xs</span> = <span class="id" title="var">true</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">xs</span>; <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">intros</span>; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">orb_false_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">subst</span>; <span class="id" title="tactic">simpl</span>; <span class="id" title="tactic">eauto</span>.<br/>
+<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Ltac</span> <span class="id" title="var">bdestruct</span> <span class="id" title="var">H</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">first</span> [ <span class="id" title="tactic">apply</span> <span class="id" title="var">andb_true_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span> ; <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> ].<br/>
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <span class="id" title="var">anyb_true_iff</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">l</span>, <span class="id" title="var">anyb</span> <span class="id" title="var">l</span> = <span class="id" title="var">true</span> &lt;-&gt; <span class="id" title="var">In</span> <span class="id" title="var">true</span> <span class="id" title="var">l</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">l</span>; <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;{ <span class="id" title="tactic">intuition</span>. }<br/>
+&nbsp;&nbsp;{ <span class="id" title="tactic">rewrite</span> <span class="id" title="var">orb_true_iff</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">IHl</span>. <span class="id" title="tactic">reflexivity</span>. }<br/>
+<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Theorem</span> <span class="id" title="var">anyb_false_iff</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">l</span>, <span class="id" title="var">anyb</span> <span class="id" title="var">l</span> = <span class="id" title="var">false</span> &lt;-&gt; ~<span class="id" title="var">In</span> <span class="id" title="var">true</span> <span class="id" title="var">l</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">l</span>; <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;{ <span class="id" title="tactic">tauto</span>. }<br/>
+&nbsp;&nbsp;{ <span class="id" title="tactic">rewrite</span> <span class="id" title="var">orb_false_iff</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">IHl</span>; <span class="id" title="tactic">clear</span> <span class="id" title="var">IHl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intuition</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="tactic">subst</span>. <span class="id" title="tactic">discriminate</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;- <span class="id" title="tactic">destruct</span> <span class="id" title="var">a</span>; <span class="id" title="tactic">tauto</span>. }<br/>
+<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Section</span> <span class="id" title="keyword">wf</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Variable</span> <span class="id" title="var">T</span> : <span class="id" title="keyword">Type</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Variable</span> <span class="id" title="var">R1</span> <span class="id" title="var">R2</span> : <span class="id" title="var">T</span> -&gt; <span class="id" title="var">T</span> -&gt; <span class="id" title="keyword">Prop</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Hypothesis</span> <span class="id" title="var">R1_R2</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span>, <span class="id" title="var">R1</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span> -&gt; <span class="id" title="var">R2</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Lemma</span> <span class="id" title="var">Proper_well_founded</span> : <span class="id" title="var">well_founded</span> <span class="id" title="var">R2</span> -&gt; <span class="id" title="var">well_founded</span> <span class="id" title="var">R1</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intro</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">well_founded</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">refine</span> (@<span class="id" title="keyword">Fix</span> <span class="id" title="var">T</span> <span class="id" title="var">_</span> <span class="id" title="var">H</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>); <span class="id" title="tactic">clear</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>. <span class="id" title="tactic">constructor</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>. <span class="id" title="tactic">eapply</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Defined</span>.<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="keyword">wf</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Definition</span> <span class="id" title="var">set_equiv</span> {<span class="id" title="var">T</span> : <span class="id" title="keyword">Type</span>} (<span class="id" title="var">xs</span> <span class="id" title="var">ys</span> : <span class="id" title="var">list</span> <span class="id" title="var">T</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">forall</span> <span class="id" title="var">x</span>, <span class="id" title="var">In</span> <span class="id" title="var">x</span> <span class="id" title="var">xs</span> &lt;-&gt; <span class="id" title="var">In</span> <span class="id" title="var">x</span> <span class="id" title="var">ys</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">anyb_In</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">xs</span>, <span class="id" title="var">In</span> <span class="id" title="var">true</span> <span class="id" title="var">xs</span> &lt;-&gt; <span class="id" title="var">anyb</span> <span class="id" title="var">xs</span> = <span class="id" title="var">true</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">induction</span> <span class="id" title="var">xs</span>.<br/>
+&nbsp;&nbsp;{ <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">split</span>; <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">inversion</span> <span class="id" title="var">H</span>. }<br/>
+&nbsp;&nbsp;{ <span class="id" title="tactic">simpl</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">orb_true_iff</span>. <span class="id" title="tactic">rewrite</span> <span class="id" title="var">IHxs</span>. <span class="id" title="tactic">tauto</span>. }<br/>
+<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">Proper_anyb</span> : <span class="id" title="var">Proper</span> (<span class="id" title="var">set_equiv</span> ==&gt; <span class="id" title="var">eq</span>) <span class="id" title="var">anyb</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">red</span>. <span class="id" title="tactic">red</span>. <span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">anyb</span> <span class="id" title="var">x</span>) <span class="id" title="var">eqn</span>:?.<br/>
+&nbsp;&nbsp;{ <span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">anyb_In</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Heqb</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">symmetry</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">anyb_In</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">assumption</span>. }<br/>
+&nbsp;&nbsp;{ <span class="id" title="tactic">destruct</span> (<span class="id" title="var">anyb</span> <span class="id" title="var">y</span>) <span class="id" title="var">eqn</span>:?; <span class="id" title="tactic">auto</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">anyb_In</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Heqb0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">H</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Heqb0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">anyb_In</span> <span class="id" title="tactic">in</span> <span class="id" title="var">Heqb0</span>. <span class="id" title="tactic">congruence</span>. }<br/>
+<span class="id" title="keyword">Defined</span>.<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="indexpage.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

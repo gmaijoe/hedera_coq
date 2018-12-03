@@ -1,0 +1,350 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<title>SimpleGraphImpl</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">SimpleGraphImpl</h1>
+
+<div class="code">
+<span class="comment">(*&nbsp;Copyright&nbsp;Swirlds&nbsp;Inc.&nbsp;2018&nbsp;*)</span><br/>
+</div>
+
+<div class="doc">
+<a name="lab4"></a><h2 class="section">This file defines a simple implementation of graphs.</h2>
+
+ 
+</div>
+<div class="code">
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Coq.Lists.List</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Coq.Lists.ListSet</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Coq.Logic.Eqdep_dec</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="var">ExtLib.Data.Member</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">ExtLib.Relations.TransitiveClosure</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Swirlds.Unique</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Swirlds.Graph</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Swirlds.Sets</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Swirlds.Util</span>.<br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Swirlds.FixLib</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">exists_flip</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">T</span> <span class="id" title="var">U</span> (<span class="id" title="var">F</span> : <span class="id" title="var">T</span> -&gt; <span class="id" title="var">U</span> -&gt; <span class="id" title="keyword">Prop</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">exists</span> <span class="id" title="var">x</span>, <span class="id" title="tactic">exists</span> <span class="id" title="var">y</span>, <span class="id" title="var">F</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>) &lt;-&gt; (<span class="id" title="tactic">exists</span> <span class="id" title="var">y</span>, <span class="id" title="tactic">exists</span> <span class="id" title="var">x</span>, <span class="id" title="var">F</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>).<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">firstorder</span>. <span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">exists_sig</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">T</span> (<span class="id" title="var">P</span> : <span class="id" title="var">T</span> -&gt; <span class="id" title="keyword">Prop</span>) (<span class="id" title="var">Q</span> : { <span class="id" title="var">x</span> : <span class="id" title="var">T</span> | <span class="id" title="var">P</span> <span class="id" title="var">x</span> } -&gt; <span class="id" title="keyword">Prop</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">exists</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <span class="id" title="var">Q</span> (@<span class="id" title="var">exist</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>)) -&gt; (<span class="id" title="tactic">exists</span> <span class="id" title="var">y</span>, <span class="id" title="var">Q</span> <span class="id" title="var">y</span>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">eexists</span>; <span class="id" title="var">eassumption</span>.<br/>
+<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">exists_and</span> : <span class="id" title="keyword">forall</span> (<span class="id" title="var">P</span> <span class="id" title="var">Q</span> : <span class="id" title="keyword">Prop</span>) (<span class="id" title="var">Z</span> : <span class="id" title="var">P</span> /\ <span class="id" title="var">Q</span> -&gt; <span class="id" title="keyword">Prop</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="tactic">exists</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>, <span class="id" title="var">Z</span> (<span class="id" title="var">conj</span> <span class="id" title="var">x</span> <span class="id" title="var">y</span>)) -&gt; (<span class="id" title="tactic">exists</span> <span class="id" title="var">y</span>, <span class="id" title="var">Z</span> <span class="id" title="var">y</span>).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">eexists</span>; <span class="id" title="var">eassumption</span>.<br/>
+<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Global Instance</span> <span class="id" title="var">EqDec_bool</span> : <span class="id" title="var">EqDec</span> <span class="id" title="var">bool</span>.<br/>
+<span class="id" title="keyword">Proof</span>. <span class="id" title="tactic">constructor</span>. <span class="id" title="var">decide</span> <span class="id" title="var">equality</span>. <span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Move above 
+</div>
+<div class="code">
+
+<br/>
+<span class="id" title="keyword">Module</span> <span class="id" title="var">SimpleGraph</span> (<span class="id" title="var">DT</span> : <span class="id" title="var">Has_EqDec</span>)<br/>
+&nbsp;&nbsp;&lt;: <span class="id" title="var">Graph</span> <span class="id" title="keyword">with</span> <span class="id" title="keyword">Definition</span> <span class="id" title="var">Node</span> := <span class="id" title="var">DT.T</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">Node</span> : <span class="id" title="keyword">Type</span> := <span class="id" title="var">DT.T</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">Node_eq_dec</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span> : <span class="id" title="var">Node</span>, {<span class="id" title="var">a</span> = <span class="id" title="var">b</span>} + {<span class="id" title="var">a</span> &lt;&gt; <span class="id" title="var">b</span>} :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">eq_dec</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Record</span> <span class="id" title="var">Graph'</span> := <span class="id" title="var">mkGraph</span><br/>
+&nbsp;&nbsp;{ <span class="id" title="var">_nodes</span> : <span class="id" title="tactic">set</span> <span class="id" title="var">Node</span><br/>
+&nbsp;&nbsp;; <span class="id" title="var">_edges</span> : <span class="id" title="var">Node</span> -&gt; <span class="id" title="var">Node</span> -&gt; <span class="id" title="var">bool</span><br/>
+&nbsp;&nbsp;}.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">Graph</span> : <span class="id" title="keyword">Type</span> := <span class="id" title="var">Graph'</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;*&nbsp;The&nbsp;Propositional&nbsp;interface<br/>
+&nbsp;&nbsp;&nbsp;*&nbsp;This&nbsp;is&nbsp;useful&nbsp;for&nbsp;stating&nbsp;properties.<br/>
+&nbsp;&nbsp;&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">IsNode</span> (<span class="id" title="var">g</span> : <span class="id" title="var">Graph</span>) (<span class="id" title="var">n</span> : <span class="id" title="var">Node</span>) : <span class="id" title="keyword">Prop</span> := <span class="id" title="var">set_In</span> <span class="id" title="var">n</span> <span class="id" title="var">g</span>.(<span class="id" title="var">_nodes</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">IsEdge</span> (<span class="id" title="var">g</span> : <span class="id" title="var">Graph</span>) (<span class="id" title="var">from</span> <span class="id" title="var">to</span> : <span class="id" title="var">Node</span>) : <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IsNode</span> <span class="id" title="var">g</span> <span class="id" title="var">from</span> /\ <span class="id" title="var">IsNode</span> <span class="id" title="var">g</span> <span class="id" title="var">to</span> /\ <span class="id" title="var">g</span>.(<span class="id" title="var">_edges</span>) <span class="id" title="var">from</span> <span class="id" title="var">to</span> = <span class="id" title="var">true</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Theorem</span> <span class="id" title="var">Edge_on_Nodes</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">g</span> <span class="id" title="var">from</span> <span class="id" title="var">to</span>, <span class="id" title="var">IsEdge</span> <span class="id" title="var">g</span> <span class="id" title="var">from</span> <span class="id" title="var">to</span> -&gt; <span class="id" title="var">IsNode</span> <span class="id" title="var">g</span> <span class="id" title="var">from</span> /\ <span class="id" title="var">IsNode</span> <span class="id" title="var">g</span> <span class="id" title="var">to</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">IsEdge</span>; <span class="id" title="tactic">intros</span>; <span class="id" title="tactic">tauto</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">Acyclic</span> (<span class="id" title="var">G</span> : <span class="id" title="var">Graph</span>) : <span class="id" title="keyword">Prop</span> := <span class="id" title="var">well_founded</span> (<span class="id" title="var">IsEdge</span> <span class="id" title="var">G</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">Ancestor</span> (<span class="id" title="var">G</span> : <span class="id" title="var">Graph</span>) : <span class="id" title="var">Node</span> -&gt; <span class="id" title="var">Node</span> -&gt; <span class="id" title="keyword">Prop</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">makeTrans</span> (<span class="id" title="var">IsEdge</span> <span class="id" title="var">G</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;*&nbsp;The&nbsp;dependent&nbsp;interface<br/>
+&nbsp;&nbsp;&nbsp;*&nbsp;These&nbsp;definitions&nbsp;expose&nbsp;core&nbsp;operations&nbsp;computationally&nbsp;and<br/>
+&nbsp;&nbsp;&nbsp;*&nbsp;combine&nbsp;parts&nbsp;of&nbsp;their&nbsp;specification&nbsp;with&nbsp;their&nbsp;type.<br/>
+&nbsp;&nbsp;&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">nodes</span> (<span class="id" title="var">g</span> : <span class="id" title="var">Graph</span>) : <span class="id" title="tactic">set</span> { <span class="id" title="var">n</span> : <span class="id" title="var">Node</span> | <span class="id" title="var">IsNode</span> <span class="id" title="var">g</span> <span class="id" title="var">n</span> } :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">with_prop</span> (<span class="id" title="var">IsNode</span> <span class="id" title="var">g</span>) <span class="id" title="var">g</span>.(<span class="id" title="var">_nodes</span>) (<span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> <span class="id" title="var">pf</span> =&gt; <span class="id" title="var">pf</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Theorem</span> <span class="id" title="var">nodes_complete</span><br/>
+&nbsp;&nbsp;: <span class="id" title="keyword">forall</span> (<span class="id" title="var">G</span> : <span class="id" title="var">Graph</span>) <span class="id" title="var">n</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IsNode</span> <span class="id" title="var">G</span> <span class="id" title="var">n</span> -&gt; <span class="id" title="tactic">exists</span> <span class="id" title="var">pf</span> : <span class="id" title="var">IsNode</span> <span class="id" title="var">G</span> <span class="id" title="var">n</span>, <span class="id" title="var">set_In</span> (@<span class="id" title="var">exist</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">n</span> <span class="id" title="var">pf</span>) (<span class="id" title="var">nodes</span> <span class="id" title="var">G</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">G</span>; <span class="id" title="tactic">unfold</span> <span class="id" title="var">IsNode</span>, <span class="id" title="var">set_In</span>, <span class="id" title="var">nodes</span>, <span class="id" title="var">IsNode</span>, <span class="id" title="var">set_In</span>; <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">with_prop_with_In</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">setoid_rewrite</span> <span class="id" title="var">in_map_iff</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">In_with_In</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">do</span> 2 <span class="id" title="tactic">eexists</span>; <span class="id" title="tactic">split</span>; [ | <span class="id" title="var">eassumption</span> ].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">edges</span> (<span class="id" title="var">g</span> : <span class="id" title="var">Graph</span>)<br/>
+&nbsp;&nbsp;: <span class="id" title="tactic">set</span> { <span class="id" title="var">nn</span> : <span class="id" title="var">Node</span> * <span class="id" title="var">Node</span> | <span class="id" title="var">IsEdge</span> <span class="id" title="var">g</span> (<span class="id" title="var">fst</span> <span class="id" title="var">nn</span>) (<span class="id" title="var">snd</span> <span class="id" title="var">nn</span>) } :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">ns</span> := <span class="id" title="var">nodes</span> <span class="id" title="var">g</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">filter_map</span> (<span class="id" title="keyword">fun</span> '(<span class="id" title="var">l</span>,<span class="id" title="var">r</span>) =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">g</span>.(<span class="id" title="var">_edges</span>) (<span class="id" title="var">proj1_sig</span> <span class="id" title="var">l</span>) (<span class="id" title="var">proj1_sig</span> <span class="id" title="var">r</span>) <span class="id" title="keyword">as</span> <span class="id" title="var">Z</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">return</span> <span class="id" title="var">g</span>.(<span class="id" title="var">_edges</span>) (<span class="id" title="var">proj1_sig</span> <span class="id" title="var">l</span>) (<span class="id" title="var">proj1_sig</span> <span class="id" title="var">r</span>) = <span class="id" title="var">Z</span> -&gt; <span class="id" title="var">_</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">true</span> =&gt; <span class="id" title="keyword">fun</span> <span class="id" title="var">pf</span> =&gt; <span class="id" title="var">Some</span> (@<span class="id" title="var">exist</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> (<span class="id" title="var">proj1_sig</span> <span class="id" title="var">l</span>, <span class="id" title="var">proj1_sig</span> <span class="id" title="var">r</span>) (<span class="id" title="var">conj</span> (<span class="id" title="var">proj2_sig</span> <span class="id" title="var">l</span>) (<span class="id" title="var">conj</span> (<span class="id" title="var">proj2_sig</span> <span class="id" title="var">r</span>) <span class="id" title="var">pf</span>)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">false</span> =&gt; <span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span> <span class="id" title="var">eq_refl</span>) (<span class="id" title="var">set_prod</span> <span class="id" title="var">ns</span> <span class="id" title="var">ns</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">edgesTo</span> (<span class="id" title="var">g</span> : <span class="id" title="var">Graph</span>) (<span class="id" title="var">n</span> : <span class="id" title="var">Node</span>) : <span class="id" title="tactic">set</span> { <span class="id" title="var">n'</span> : <span class="id" title="var">Node</span> | <span class="id" title="var">IsEdge</span> <span class="id" title="var">g</span> <span class="id" title="var">n'</span> <span class="id" title="var">n</span> } :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">in_dec</span> <span class="id" title="var">eq_dec</span> <span class="id" title="var">n</span> <span class="id" title="var">g</span>.(<span class="id" title="var">_nodes</span>) <span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="tactic">left</span> <span class="id" title="var">pf_IsNode</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">filter_map</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">from</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">match</span> <span class="id" title="var">g</span>.(<span class="id" title="var">_edges</span>) (<span class="id" title="var">proj1_sig</span> <span class="id" title="var">from</span>) <span class="id" title="var">n</span> <span class="id" title="keyword">as</span> <span class="id" title="var">Z</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">return</span> <span class="id" title="var">g</span>.(<span class="id" title="var">_edges</span>) (<span class="id" title="var">proj1_sig</span> <span class="id" title="var">from</span>) <span class="id" title="var">n</span> = <span class="id" title="var">Z</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">option</span> { <span class="id" title="var">n'</span> : <span class="id" title="var">Node</span> | <span class="id" title="var">IsEdge</span> <span class="id" title="var">g</span> <span class="id" title="var">n'</span> <span class="id" title="var">n</span> }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">with</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">true</span> =&gt; <span class="id" title="keyword">fun</span> <span class="id" title="var">pf</span> =&gt; <span class="id" title="var">Some</span> (@<span class="id" title="var">exist</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> (<span class="id" title="var">proj1_sig</span> <span class="id" title="var">from</span>) (<span class="id" title="var">conj</span> (<span class="id" title="var">proj2_sig</span> <span class="id" title="var">from</span>) (<span class="id" title="var">conj</span> <span class="id" title="var">pf_IsNode</span> <span class="id" title="var">pf</span>)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="var">false</span> =&gt; <span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">None</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span> <span class="id" title="var">eq_refl</span>) (<span class="id" title="var">nodes</span> <span class="id" title="var">g</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;| <span class="id" title="tactic">right</span> <span class="id" title="var">_</span> =&gt; <span class="id" title="var">nil</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">end</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;NOTE:&nbsp;This&nbsp;proof&nbsp;is&nbsp;much&nbsp;more&nbsp;painful&nbsp;than&nbsp;one&nbsp;would&nbsp;like.<br/>
+&nbsp;&nbsp;&nbsp;*&nbsp;Perhaps&nbsp;there&nbsp;is&nbsp;a&nbsp;better&nbsp;way&nbsp;to&nbsp;approach&nbsp;it?&nbsp;Or&nbsp;perhaps&nbsp;this&nbsp;indicates<br/>
+&nbsp;&nbsp;&nbsp;*&nbsp;that&nbsp;the&nbsp;non-dependent&nbsp;representation&nbsp;is&nbsp;cleaner?<br/>
+&nbsp;&nbsp;&nbsp;*)</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Theorem</span> <span class="id" title="var">edgesTo_complete</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">g</span> <span class="id" title="var">n</span> <span class="id" title="var">n'</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IsEdge</span> <span class="id" title="var">g</span> <span class="id" title="var">n</span> <span class="id" title="var">n'</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">pf</span>, <span class="id" title="var">set_In</span> (@<span class="id" title="var">exist</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">n</span> <span class="id" title="var">pf</span>) (<span class="id" title="var">edgesTo</span> <span class="id" title="var">g</span> <span class="id" title="var">n'</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">IsEdge</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">edgesTo</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">in_dec</span> <span class="id" title="var">eq_dec</span> <span class="id" title="var">n'</span> (<span class="id" title="var">_nodes</span> <span class="id" title="var">g</span>)); [ | <span class="id" title="var">exfalso</span>; <span class="id" title="tactic">tauto</span> ].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">unfold</span> <span class="id" title="var">set_In</span>. <span class="id" title="tactic">setoid_rewrite</span> <span class="id" title="var">in_filter_map_iff</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">exists_flip</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">exists_sig</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">n</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">generalize</span> (@<span class="id" title="var">eq_refl</span> <span class="id" title="var">bool</span> (<span class="id" title="var">_edges</span> <span class="id" title="var">g</span> <span class="id" title="var">n</span> <span class="id" title="var">n'</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">H0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">IsEdge</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">nodes_complete</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">exists</span> <span class="id" title="var">x</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">exists_and</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">x</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">exists_and</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">i</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">clear</span> - <span class="id" title="var">H1</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">H1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [ | <span class="id" title="tactic">assumption</span> ].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">revert</span> <span class="id" title="var">e</span>. <span class="id" title="var">revert</span> <span class="id" title="var">H1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">change</span> (<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">let</span> <span class="id" title="var">F</span> := (<span class="id" title="keyword">fun</span> <span class="id" title="var">z</span> =&gt; <span class="id" title="var">_edges</span> <span class="id" title="var">g</span> <span class="id" title="var">z</span> <span class="id" title="var">n'</span>) <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">forall</span> (<span class="id" title="var">H1</span> : <span class="id" title="var">F</span> <span class="id" title="var">n</span> = <span class="id" title="var">true</span>) (<span class="id" title="var">e</span> : <span class="id" title="var">F</span> <span class="id" title="var">n</span> = <span class="id" title="var">_edges</span> <span class="id" title="var">g</span> <span class="id" title="var">n</span> <span class="id" title="var">n'</span>),<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">if</span> <span class="id" title="var">_edges</span> <span class="id" title="var">g</span> <span class="id" title="var">n</span> <span class="id" title="var">n'</span> <span class="id" title="keyword">as</span> <span class="id" title="var">Z</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">return</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">F</span> <span class="id" title="var">n</span> = <span class="id" title="var">Z</span> -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">option</span> {<span class="id" title="var">n'0</span> : <span class="id" title="var">Node</span> | <span class="id" title="var">IsNode</span> <span class="id" title="var">g</span> <span class="id" title="var">n'0</span> /\ <span class="id" title="var">IsNode</span> <span class="id" title="var">g</span> <span class="id" title="var">n'</span> /\ <span class="id" title="var">F</span> <span class="id" title="var">n'0</span> = <span class="id" title="var">true</span>})<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">then</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">fun</span> <span class="id" title="var">pf</span> : <span class="id" title="var">F</span> <span class="id" title="var">n</span> = <span class="id" title="var">true</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">exist</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">n'0</span> : <span class="id" title="var">Node</span> =&gt; <span class="id" title="var">IsNode</span> <span class="id" title="var">g</span> <span class="id" title="var">n'0</span> /\ <span class="id" title="var">IsNode</span> <span class="id" title="var">g</span> <span class="id" title="var">n'</span> /\ <span class="id" title="var">F</span> <span class="id" title="var">n'0</span> = <span class="id" title="var">true</span>) <span class="id" title="var">n</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">conj</span> <span class="id" title="var">x</span> (<span class="id" title="var">conj</span> <span class="id" title="var">i</span> <span class="id" title="var">pf</span>)))<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="keyword">else</span> <span class="id" title="keyword">fun</span> <span class="id" title="var">_</span> : <span class="id" title="var">F</span> <span class="id" title="var">n</span> = <span class="id" title="var">false</span> =&gt; <span class="id" title="var">None</span>) <span class="id" title="var">e</span> =<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">Some</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">exist</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">n'0</span> : <span class="id" title="var">Node</span> =&gt; <span class="id" title="var">IsNode</span> <span class="id" title="var">g</span> <span class="id" title="var">n'0</span> /\ <span class="id" title="var">IsNode</span> <span class="id" title="var">g</span> <span class="id" title="var">n'</span> /\ <span class="id" title="var">F</span> <span class="id" title="var">n'0</span> = <span class="id" title="var">true</span>) <span class="id" title="var">n</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">conj</span> <span class="id" title="var">x</span> (<span class="id" title="var">conj</span> <span class="id" title="var">i</span> <span class="id" title="var">H1</span>))))).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intro</span> <span class="id" title="var">F</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">clearbody</span> <span class="id" title="var">F</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_edges</span> <span class="id" title="var">g</span> <span class="id" title="var">n</span> <span class="id" title="var">n'</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">f_equal</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">Eqdep_dec.UIP_dec</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">decide</span> <span class="id" title="var">equality</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">congruence</span>. } }<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="comment">(*&nbsp;*&nbsp;Non-dependent&nbsp;interface<br/>
+&nbsp;&nbsp;&nbsp;*&nbsp;TODO:&nbsp;Explore&nbsp;whether&nbsp;this&nbsp;is&nbsp;easier&nbsp;to&nbsp;use&nbsp;in&nbsp;practice.<br/>
+&nbsp;&nbsp;&nbsp;*&nbsp;Note&nbsp;that&nbsp;dependent&nbsp;types&nbsp;break&nbsp;a&nbsp;lot&nbsp;of&nbsp;nice&nbsp;simple&nbsp;abstractions.<br/>
+&nbsp;&nbsp;&nbsp;*)</span><br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">nodes'</span> (<span class="id" title="var">g</span> : <span class="id" title="var">Graph</span>) : <span class="id" title="tactic">set</span> <span class="id" title="var">Node</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">uniqueBy</span> (<span class="id" title="keyword">fun</span> <span class="id" title="var">x</span> =&gt; <span class="id" title="var">x</span>) <span class="id" title="var">eq_dec</span> (<span class="id" title="var">map</span> (@<span class="id" title="var">proj1_sig</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>) (<span class="id" title="var">nodes</span> <span class="id" title="var">g</span>)).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Theorem</span> <span class="id" title="var">nodes'_ok</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">g</span> <span class="id" title="var">n</span>, <span class="id" title="var">set_In</span> <span class="id" title="var">n</span> (<span class="id" title="var">nodes'</span> <span class="id" title="var">g</span>) &lt;-&gt; <span class="id" title="var">IsNode</span> <span class="id" title="var">g</span> <span class="id" title="var">n</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">set_In</span>, <span class="id" title="var">nodes'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">eapply</span> <span class="id" title="var">uniqueBy_subset</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">in_map_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">x</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *. <span class="id" title="tactic">subst</span>; <span class="id" title="tactic">auto</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">red</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">nodes</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">with_prop_with_In</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">map_map</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> &lt;- <span class="id" title="var">uniqueBy_id</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">in_map_iff</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">exists_sig</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> <span class="id" title="var">n</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (@<span class="id" title="var">In_with_In</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">H</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eexists</span>. <span class="id" title="tactic">split</span>; [ <span class="id" title="tactic">reflexivity</span> | ].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">eassumption</span>. }<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Theorem</span> <span class="id" title="var">nodes'_Unique</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">g</span>, <span class="id" title="var">Unique</span> (<span class="id" title="var">nodes'</span> <span class="id" title="var">g</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>. <span class="id" title="tactic">eapply</span> <span class="id" title="var">Unique_uniqueBy</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Qed</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">edges'</span> (<span class="id" title="var">g</span> : <span class="id" title="var">Graph</span>) : <span class="id" title="tactic">set</span> (<span class="id" title="var">Node</span> * <span class="id" title="var">Node</span>) :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">map</span> (@<span class="id" title="var">proj1_sig</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>) (<span class="id" title="var">edges</span> <span class="id" title="var">g</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Theorem</span> <span class="id" title="var">edges'_ok</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">g</span> <span class="id" title="var">n</span>, <span class="id" title="var">set_In</span> <span class="id" title="var">n</span> (<span class="id" title="var">edges'</span> <span class="id" title="var">g</span>) &lt;-&gt; <span class="id" title="var">IsEdge</span> <span class="id" title="var">g</span> (<span class="id" title="var">fst</span> <span class="id" title="var">n</span>) (<span class="id" title="var">snd</span> <span class="id" title="var">n</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">unfold</span> <span class="id" title="var">set_In</span>, <span class="id" title="var">edges'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">in_map_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [ ? [ ? ? ] ].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">x</span>. <span class="id" title="tactic">apply</span> <span class="id" title="var">i</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">in_map_iff</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">edges</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">setoid_rewrite</span> <span class="id" title="var">in_filter_map_iff</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">set_prod</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">exists_sig</span>. <span class="id" title="tactic">exists</span> <span class="id" title="var">n</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [ ? [ ? ? ] ].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">nodes_complete</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [ <span class="id" title="var">pff</span> ? ].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">nodes_complete</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H0</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">H0</span> <span class="id" title="keyword">as</span> [ <span class="id" title="var">pfs</span> ? ].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">IsEdge</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eexists</span> (<span class="id" title="var">conj</span> <span class="id" title="var">pff</span> (<span class="id" title="var">conj</span> <span class="id" title="var">pfs</span> <span class="id" title="var">H1</span>)).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [ <span class="id" title="tactic">reflexivity</span> | ].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">exists</span> (@<span class="id" title="var">exist</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">pff</span>, @<span class="id" title="var">exist</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span> <span class="id" title="var">pfs</span>); <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">unfold</span> <span class="id" title="var">IsEdge</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">generalize</span> (@<span class="id" title="var">eq_refl</span> <span class="id" title="var">_</span> (<span class="id" title="var">_edges</span> <span class="id" title="var">g</span> (<span class="id" title="var">fst</span> <span class="id" title="var">n</span>) (<span class="id" title="var">snd</span> <span class="id" title="var">n</span>))).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">revert</span> <span class="id" title="var">H1</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">n</span>; <span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">generalize</span> (<span class="id" title="var">exist</span><br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="keyword">fun</span> <span class="id" title="var">x</span> : <span class="id" title="var">Node</span> * <span class="id" title="var">Node</span> =&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">IsNode</span> <span class="id" title="var">g</span> (<span class="id" title="var">fst</span> <span class="id" title="var">x</span>) /\ <span class="id" title="var">IsNode</span> <span class="id" title="var">g</span> (<span class="id" title="var">snd</span> <span class="id" title="var">x</span>) /\ <span class="id" title="var">_edges</span> <span class="id" title="var">g</span> (<span class="id" title="var">fst</span> <span class="id" title="var">x</span>) (<span class="id" title="var">snd</span> <span class="id" title="var">x</span>) = <span class="id" title="var">true</span>)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">n</span>, <span class="id" title="var">n0</span>)); <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">_edges</span> <span class="id" title="var">g</span> <span class="id" title="var">n</span> <span class="id" title="var">n0</span>).<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">intros</span>. <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">f_equal</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">UIP_dec</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">eq_dec</span>. }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">congruence</span>. } }<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ <span class="id" title="tactic">eapply</span> <span class="id" title="var">in_prod_iff</span>. <span class="id" title="tactic">tauto</span>. } }<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Definition</span> <span class="id" title="var">edgesTo'</span> (<span class="id" title="var">g</span> : <span class="id" title="var">Graph</span>) (<span class="id" title="var">n</span> : <span class="id" title="var">Node</span>) : <span class="id" title="tactic">set</span> <span class="id" title="var">Node</span> :=<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">map</span> (@<span class="id" title="var">proj1_sig</span> <span class="id" title="var">_</span> <span class="id" title="var">_</span>) (<span class="id" title="var">edgesTo</span> <span class="id" title="var">g</span> <span class="id" title="var">n</span>).<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Theorem</span> <span class="id" title="var">edgesTo'_sound</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">g</span> <span class="id" title="var">n</span> <span class="id" title="var">n'</span>, <span class="id" title="var">set_In</span> <span class="id" title="var">n'</span> (<span class="id" title="var">edgesTo'</span> <span class="id" title="var">g</span> <span class="id" title="var">n</span>) -&gt; <span class="id" title="var">IsEdge</span> <span class="id" title="var">g</span> <span class="id" title="var">n'</span> <span class="id" title="var">n</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">edgesTo'</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">in_map_iff</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">x</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>; <span class="id" title="tactic">subst</span>. <span class="id" title="tactic">eauto</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Theorem</span> <span class="id" title="var">edgesTo'_complete</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">g</span> <span class="id" title="var">n</span> <span class="id" title="var">n'</span>, <span class="id" title="var">IsEdge</span> <span class="id" title="var">g</span> <span class="id" title="var">n'</span> <span class="id" title="var">n</span> -&gt; <span class="id" title="var">set_In</span> <span class="id" title="var">n'</span> (<span class="id" title="var">edgesTo'</span> <span class="id" title="var">g</span> <span class="id" title="var">n</span>).<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">eapply</span> <span class="id" title="var">edgesTo_complete</span> <span class="id" title="tactic">in</span> <span class="id" title="var">H</span>. <span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">unfold</span> <span class="id" title="var">edgesTo'</span>, <span class="id" title="var">set_In</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">in_map_iff</span>. <span class="id" title="tactic">eexists</span>; <span class="id" title="tactic">split</span>; [ | <span class="id" title="var">eassumption</span> ].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">reflexivity</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+<span class="comment">(*<br/>
+&nbsp;&nbsp;Parameter&nbsp;edgesFrom'&nbsp;:&nbsp;Graph&nbsp;-&gt;&nbsp;Node&nbsp;-&gt;&nbsp;list&nbsp;Node.<br/>
+<br/>
+&nbsp;&nbsp;Axiom&nbsp;edgesFrom_sound&nbsp;:&nbsp;forall&nbsp;g&nbsp;n&nbsp;n',&nbsp;set_In&nbsp;n'&nbsp;(edgesFrom'&nbsp;g&nbsp;n)&nbsp;-&gt;&nbsp;IsEdge&nbsp;g&nbsp;n&nbsp;n'.<br/>
+&nbsp;&nbsp;Axiom&nbsp;edgesFrom_complete&nbsp;:&nbsp;forall&nbsp;g&nbsp;n&nbsp;n',&nbsp;IsEdge&nbsp;g&nbsp;n&nbsp;n'&nbsp;-&gt;&nbsp;set_In&nbsp;n'&nbsp;(edgesFrom'&nbsp;g&nbsp;n).<br/>
+*)</span><br/>
+
+<br/>
+<span class="id" title="keyword">End</span> <span class="id" title="var">SimpleGraph</span>.<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="indexpage.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>

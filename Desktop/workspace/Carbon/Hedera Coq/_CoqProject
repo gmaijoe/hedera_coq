@@ -1,0 +1,27 @@
+-Q theories Swirlds
+
+# Utilities
+theories/ToBool.v
+theories/Tactics.v
+theories/Util.v
+theories/Lemmas.v
+theories/FixLib.v
+theories/Unique.v
+theories/Sets.v
+theories/Pigeon.v
+theories/Math.v
+
+# Graph definitions
+theories/Graph.v
+theories/SimpleGraphImpl.v
+
+# Swirld definitions
+theories/HashGraph.v
+theories/Definitions.v
+theories/See.v
+theories/Round.v
+theories/Voting.v
+theories/Swirlds.v
+
+# Demos and Tests
+tests/Square.v

@@ -1,0 +1,133 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link href="coqdoc.css" rel="stylesheet" type="text/css" />
+<title>Math</title>
+</head>
+
+<body>
+
+<div id="page">
+
+<div id="header">
+</div>
+
+<div id="main">
+
+<h1 class="libtitle">Math</h1>
+
+<div class="code">
+<span class="comment">(*&nbsp;Copyright&nbsp;Swirlds&nbsp;Inc.&nbsp;2018&nbsp;*)</span><br/>
+<span class="id" title="keyword">Require</span> <span class="id" title="keyword">Import</span> <span class="id" title="var">Coq.omega.Omega</span>.<br/>
+
+<br/>
+</div>
+
+<div class="doc">
+Math proofs 
+</div>
+<div class="code">
+<span class="id" title="keyword">Opaque</span> <span class="id" title="var">Nat.div</span> <span class="id" title="var">Nat.modulo</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">mod_div_0</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span>, <span class="id" title="var">b</span> &lt;&gt; 0 -&gt; <span class="id" title="var">a</span> <span class="id" title="var">mod</span> <span class="id" title="var">b</span> / <span class="id" title="var">b</span> = 0.<br/>
+<span class="id" title="keyword">Proof</span> <span class="id" title="keyword">using</span>. <span class="id" title="tactic">clear</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.div_small</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">apply</span> <span class="id" title="var">Nat.mod_upper_bound</span>. <span class="id" title="tactic">assumption</span>.<br/>
+<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">n_div_m</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span>, <span class="id" title="var">m</span> &lt;&gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">n</span> = (<span class="id" title="var">n</span> / <span class="id" title="var">m</span>) * <span class="id" title="var">m</span> + <span class="id" title="var">n</span> <span class="id" title="var">mod</span> <span class="id" title="var">m</span>.<br/>
+<span class="id" title="keyword">Proof</span> <span class="id" title="keyword">using</span>. <span class="id" title="tactic">clear</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">generalize</span> (<span class="id" title="var">Nat.div_mod</span> <span class="id" title="var">n</span> <span class="id" title="var">m</span> <span class="id" title="var">H</span>). <span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Nat.mul_comm</span>. <span class="id" title="tactic">omega</span>.<br/>
+<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">div_add_strong</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">a</span> <span class="id" title="var">b</span> <span class="id" title="var">c</span> : <span class="id" title="var">nat</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">c</span> &lt;&gt; 0 -&gt;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">a</span> + <span class="id" title="var">b</span>) / <span class="id" title="var">c</span> = <span class="id" title="var">a</span> / <span class="id" title="var">c</span> + <span class="id" title="var">b</span> / <span class="id" title="var">c</span> + (<span class="id" title="var">a</span> <span class="id" title="var">mod</span> <span class="id" title="var">c</span> + <span class="id" title="var">b</span> <span class="id" title="var">mod</span> <span class="id" title="var">c</span>) / <span class="id" title="var">c</span>.<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> (<span class="id" title="var">n_div_m</span> <span class="id" title="var">a</span> <span class="id" title="var">c</span> <span class="id" title="keyword">ltac</span>:(<span class="id" title="tactic">assumption</span>)).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">generalize</span> (<span class="id" title="var">a</span> / <span class="id" title="var">c</span>); <span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">cutrewrite</span> (<span class="id" title="var">n</span> * <span class="id" title="var">c</span> + <span class="id" title="var">a</span> <span class="id" title="var">mod</span> <span class="id" title="var">c</span> + <span class="id" title="var">b</span> = (<span class="id" title="var">a</span> <span class="id" title="var">mod</span> <span class="id" title="var">c</span> + <span class="id" title="var">b</span>) + <span class="id" title="var">n</span> * <span class="id" title="var">c</span>); [ | <span class="id" title="tactic">omega</span> ].<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Nat.div_add</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">assumption</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">cutrewrite</span> (<span class="id" title="var">n</span> * <span class="id" title="var">c</span> + <span class="id" title="var">a</span> <span class="id" title="var">mod</span> <span class="id" title="var">c</span> = <span class="id" title="var">a</span> <span class="id" title="var">mod</span> <span class="id" title="var">c</span> + <span class="id" title="var">n</span> * <span class="id" title="var">c</span>); [ | <span class="id" title="tactic">omega</span> ].<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Nat.div_add</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">assumption</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">mod_div_0</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">assumption</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">cutrewrite</span> ((<span class="id" title="var">a</span> <span class="id" title="var">mod</span> <span class="id" title="var">c</span> + <span class="id" title="var">n</span> * <span class="id" title="var">c</span>) <span class="id" title="var">mod</span> <span class="id" title="var">c</span> = <span class="id" title="var">a</span> <span class="id" title="var">mod</span> <span class="id" title="var">c</span>);<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;[ |<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Nat.mod_add</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">assumption</span>;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Nat.mod_mod</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">assumption</span>; <span class="id" title="tactic">reflexivity</span> ].<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> (<span class="id" title="var">n_div_m</span> <span class="id" title="var">b</span> <span class="id" title="var">c</span> <span class="id" title="keyword">ltac</span>:(<span class="id" title="tactic">assumption</span>)) <span class="id" title="tactic">at</span> 1 2.<br/>
+&nbsp;&nbsp;<span class="id" title="var">cutrewrite</span> (<span class="id" title="var">a</span> <span class="id" title="var">mod</span> <span class="id" title="var">c</span> + (<span class="id" title="var">b</span> / <span class="id" title="var">c</span> * <span class="id" title="var">c</span> + <span class="id" title="var">b</span> <span class="id" title="var">mod</span> <span class="id" title="var">c</span>) = (<span class="id" title="var">a</span> <span class="id" title="var">mod</span> <span class="id" title="var">c</span> + <span class="id" title="var">b</span> <span class="id" title="var">mod</span> <span class="id" title="var">c</span>) + <span class="id" title="var">b</span> / <span class="id" title="var">c</span> * <span class="id" title="var">c</span>); [ | <span class="id" title="tactic">omega</span> ].<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Nat.div_add</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">assumption</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Nat.div_add_l</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">assumption</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">mod_div_0</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">assumption</span>. <span class="id" title="tactic">omega</span>.<br/>
+<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Lemma</span> <span class="id" title="var">n_div_3</span> : <span class="id" title="keyword">forall</span> <span class="id" title="var">n</span>, <span class="id" title="tactic">exists</span> <span class="id" title="var">m</span>,<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">n</span> / 3 = <span class="id" title="var">m</span> /\ 2 * <span class="id" title="var">n</span> / 3 = <span class="id" title="var">m</span> + <span class="id" title="var">m</span> /\ <span class="id" title="var">n</span> = <span class="id" title="var">m</span> + <span class="id" title="var">m</span> + <span class="id" title="var">m</span>) \/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">n</span> / 3 = <span class="id" title="var">m</span> /\ 2 * <span class="id" title="var">n</span> / 3 = <span class="id" title="var">m</span> + <span class="id" title="var">m</span> /\ <span class="id" title="var">n</span> = <span class="id" title="var">m</span> + <span class="id" title="var">m</span> + <span class="id" title="var">m</span> + 1) \/<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<span class="id" title="var">n</span> / 3 = <span class="id" title="var">m</span> /\ 2 * <span class="id" title="var">n</span> / 3 = 1 + <span class="id" title="var">m</span> + <span class="id" title="var">m</span> /\ <span class="id" title="var">n</span> = <span class="id" title="var">m</span> + <span class="id" title="var">m</span> + <span class="id" title="var">m</span> + 2).<br/>
+<span class="id" title="keyword">Proof</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">generalize</span> (<span class="id" title="var">Nat.div_mod</span> <span class="id" title="var">n</span> 3 <span class="id" title="keyword">ltac</span>:(<span class="id" title="tactic">omega</span>)); <span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">generalize</span> (<span class="id" title="var">Nat.mod_upper_bound</span> <span class="id" title="var">n</span> 3 <span class="id" title="keyword">ltac</span>:(<span class="id" title="tactic">omega</span>)); <span class="id" title="tactic">intros</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">exists</span> (<span class="id" title="var">n</span> / 3).<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;<span class="id" title="var">cutrewrite</span> (<span class="id" title="var">n</span> + 0 = <span class="id" title="var">n</span>) ; [ | <span class="id" title="tactic">omega</span> ].<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">n</span> <span class="id" title="var">mod</span> 3) <span class="id" title="var">eqn</span>:?.<br/>
+&nbsp;&nbsp;{ <span class="id" title="tactic">left</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [ <span class="id" title="tactic">reflexivity</span> | ].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span> <span class="id" title="tactic">in</span> *.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [ | <span class="id" title="tactic">omega</span> ].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">div_add_strong</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">omega</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Heqn0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Nat.div_0_l</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">omega</span>. <span class="id" title="tactic">omega</span>. }<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">n0</span>.<br/>
+&nbsp;&nbsp;{ <span class="id" title="tactic">right</span>. <span class="id" title="tactic">left</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; [ <span class="id" title="tactic">reflexivity</span> | ].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">div_add_strong</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">omega</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Heqn0</span>. <span class="id" title="tactic">simpl</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cutrewrite</span> (2 / 3 = 0); [ | <span class="id" title="tactic">reflexivity</span> ].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; <span class="id" title="tactic">omega</span>. }<br/>
+&nbsp;&nbsp;{ <span class="id" title="tactic">assert</span> (<span class="id" title="var">n0</span> = 0). <span class="id" title="tactic">omega</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">subst</span>. <span class="id" title="tactic">clear</span> <span class="id" title="var">H0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">right</span>; <span class="id" title="tactic">right</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">div_add_strong</span> <span class="id" title="tactic">by</span> <span class="id" title="tactic">omega</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">rewrite</span> <span class="id" title="var">Heqn0</span>.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="var">cutrewrite</span> ((2 + 2) / 3 = 1) ; [ | <span class="id" title="tactic">reflexivity</span> ].<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="id" title="tactic">split</span>; <span class="id" title="tactic">omega</span>. }<br/>
+<span class="id" title="keyword">Defined</span>.<br/>
+
+<br/>
+<span class="id" title="keyword">Ltac</span> <span class="id" title="var">div_cases</span> <span class="id" title="var">n</span> :=<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">H</span> := <span class="id" title="tactic">fresh</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> (<span class="id" title="var">n_div_3</span> <span class="id" title="var">n</span>) <span class="id" title="keyword">as</span> [ ? [ <span class="id" title="var">H</span> | [ <span class="id" title="var">H</span> | <span class="id" title="var">H</span> ] ] ];<br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">H1</span> := <span class="id" title="tactic">fresh</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">H2</span> := <span class="id" title="tactic">fresh</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="keyword">let</span> <span class="id" title="var">H0</span> := <span class="id" title="tactic">fresh</span> <span class="id" title="tactic">in</span><br/>
+&nbsp;&nbsp;<span class="id" title="tactic">destruct</span> <span class="id" title="var">H</span> <span class="id" title="keyword">as</span> [ <span class="id" title="var">H0</span> [ <span class="id" title="var">H1</span> <span class="id" title="var">H2</span> ] ];<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">repeat</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">H0</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">H1</span> <span class="id" title="tactic">in</span> *; <span class="id" title="tactic">repeat</span> <span class="id" title="tactic">rewrite</span> <span class="id" title="var">H2</span> <span class="id" title="tactic">in</span> *;<br/>
+&nbsp;&nbsp;<span class="id" title="tactic">clear</span> <span class="id" title="var">H0</span> <span class="id" title="var">H1</span> <span class="id" title="var">H2</span>.<br/>
+</div>
+</div>
+
+<div id="footer">
+<hr/><a href="indexpage.html">Index</a><hr/>This page has been generated by <a href="http://coq.inria.fr/">coqdoc</a>
+</div>
+
+</div>
+
+</body>
+</html>
